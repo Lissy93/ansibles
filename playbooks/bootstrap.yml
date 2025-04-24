@@ -1,0 +1,79 @@
+---
+- name: Bootstrap a new server
+  hosts: all
+  become: true
+  vars:
+    timezone: Europe/London
+    hostname: "{{ inventory_hostname }}"
+    user_name: alicia
+    new_user: alicia
+    user_ssh_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+    srv_owner: alicia
+    srv_group: alicia
+    password: "{{ user_password | password_hash('sha512') }}"
+    # user_ssh_key_path: ''
+    docker_users:
+      - alicia
+
+  pre_tasks:
+    - name: Ensure Python is available
+      raw: test -e /usr/bin/python3 || (apt update && apt install -y python3)
+      changed_when: false
+
+    - name: Warn if user_password is not set
+      ansible.builtin.debug:
+        msg: |
+          ⚠️ WARNING: 'user_password' is not defined!
+          User {{ new_user }} will not be able to use sudo without a password.
+          SSH root login will not be disabled until this is fixed.
+      when: user_password is not defined
+
+  roles:
+    - role: common
+    - role: geerlingguy.docker
+    - role: users
+    - role: ssh
+    - role: firewall
+    - role: dotfiles
+
+
+  tasks:
+    - name: Set timezone
+      ansible.builtin.timezone:
+        name: "{{ timezone }}"
+
+    - name: Set hostname
+      ansible.builtin.hostname:
+        name: "{{ hostname }}"
+
+    - name: Ensure /srv and /srv/infra directories exist and are owned by {{ user_name }}
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ srv_owner }}"
+        group: "{{ srv_group }}"
+        mode: '0755'
+      loop:
+        - /srv
+        - /srv/infra
+        - /srv/infra/stack
+        - /srv/infra/stack/apps
+        - /srv/infra/stack/data
+
+- name: Check if user can connect with Ansible
+  hosts: all
+  gather_facts: false
+  become: false
+  remote_user: "{{ new_user }}"
+  tasks:
+    - name: Confirm login is working and set user_ready flag
+      set_fact:
+        user_ready: true
+
+- name: Lock down SSH (disable root login and password auth)
+  hosts: all
+  become: true
+  vars:
+    user_ready: true
+  roles:
+    - role: ssh  # Re-applies config, this time disables root login

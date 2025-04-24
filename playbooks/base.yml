@@ -1,0 +1,9 @@
+- name: Bootstrap new server
+  hosts: servers
+  become: true
+  roles:
+    - common
+    - hostname
+    - users
+    - timezone
+    - ssh
