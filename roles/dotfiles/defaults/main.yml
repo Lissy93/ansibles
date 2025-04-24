@@ -1,0 +1,3 @@
+---
+dotfiles_repo: "git@github.com:Lissy93/dotfiles.git"
+dotfiles_dir: "{{ lookup('env', 'HOME') }}/.dotfiles"

@@ -1,0 +1,35 @@
+- name: Allow fallback SSH port 22 (only during setup)
+  ufw:
+    rule: allow
+    port: "22"
+    proto: tcp
+  when: ssh_port != "22"
+
+- name: Allow custom SSH port
+  ufw:
+    rule: allow
+    port: "{{ ssh_port }}"
+    proto: tcp
+
+- name: Allow HTTP
+  ufw:
+    rule: allow
+    port: 80
+    proto: tcp
+
+- name: Allow HTTPS
+  ufw:
+    rule: allow
+    port: 443
+    proto: tcp
+
+# TODO: Add all ports and rules
+
+- name: Enable UFW
+  ufw:
+    state: enabled
+    policy: deny
+
+- name: Lock down firewall (remove old SSH port)
+  include_tasks: lockdown.yml
+  when: firewall_lockdown | default(false)

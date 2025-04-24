@@ -1,0 +1,99 @@
+- name: Ensure ~/.ssh directory exists with correct permissions
+  ansible.builtin.file:
+    path: "/home/{{ new_user }}/.ssh"
+    state: directory
+    mode: '0700'
+    owner: "{{ new_user }}"
+    group: "{{ new_user }}"
+  when: new_user is defined
+
+- name: Ensure ~/.ssh/authorized_keys exists with correct permissions
+  ansible.builtin.file:
+    path: "/home/{{ new_user }}/.ssh/authorized_keys"
+    state: touch
+    mode: '0600'
+    owner: "{{ new_user }}"
+    group: "{{ new_user }}"
+  when: new_user is defined
+
+- name: Allow SSH on configured port
+  ufw:
+    rule: allow
+    port: "{{ ssh_port }}"
+    proto: tcp
+
+
+- name: Harden SSH config
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?\s*{{ item.key }}\s+.*'
+    line: '{{ item.key }} {{ item.value }}'
+    state: present
+    backrefs: yes
+    insertafter: EOF
+    validate: 'sshd -T -f %s'
+  loop:
+    - { key: 'Protocol',                 value: '2' }
+    - { key: 'Compression',             value: 'delayed' }
+    - { key: 'MaxAuthTries',            value: '5' }
+    - { key: 'PrintLastLog',            value: 'yes' }
+    - { key: 'PermitEmptyPasswords',    value: 'no' }
+    - { key: 'IgnoreRhosts',            value: 'yes' }
+    - { key: 'IgnoreUserKnownHosts',    value: 'yes' }
+    - { key: 'HostBasedAuthentication', value: 'no' }
+    - { key: 'Port',                    value: '{{ ssh_port }}' }
+    - { key: 'StrictModes',             value: 'yes' }
+    - { key: 'PubkeyAuthentication',    value: 'yes' }
+    - { key: 'GSSAPIAuthentication',    value: 'no' }
+    - { key: 'KerberosAuthentication',  value: 'no' }
+    - { key: 'Ciphers',                 value: 'aes128-ctr,aes192-ctr,aes256-ctr' }
+    - { key: 'MACs',                    value: 'hmac-sha2-256,hmac-sha2-512' }
+  notify: Restart SSH
+  changed_when: true
+
+- name: Disable root login only if user_ready is true
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+    validate: 'sshd -T -f %s'
+  loop:
+    - { regexp: '^PermitRootLogin',         line: 'PermitRootLogin no' }
+    - { regexp: '^PasswordAuthentication',  line: 'PasswordAuthentication no' }
+    - { regexp: '^ChallengeResponseAuthentication', line: 'ChallengeResponseAuthentication no' }
+  when: user_ready | default(false)
+  notify: Restart SSH
+  changed_when: true
+
+- name: Secure SSH private keys
+  file:
+    path: "{{ item }}"
+    mode: '0600'
+  with_fileglob:
+    - /etc/ssh/*key
+  when: item is not search(".*\\.pub$")
+
+- name: Secure SSH public keys
+  file:
+    path: "{{ item }}"
+    mode: '0644'
+  with_fileglob:
+    - /etc/ssh/*.pub
+
+- name: Disable systemd ssh.socket (if enabled)
+  ansible.builtin.systemd:
+    name: ssh.socket
+    state: stopped
+    enabled: no
+  become: true
+
+- name: Enable ssh.service explicitly
+  ansible.builtin.systemd:
+    name: ssh
+    state: restarted
+    enabled: yes
+  become: true
+
+- name: Restart SSH to apply config
+  ansible.builtin.meta: flush_handlers

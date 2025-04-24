@@ -1,0 +1,6 @@
+- name: Deny default SSH port 22 (after switching)
+  ufw:
+    rule: deny
+    port: "22"
+    proto: tcp
+  when: ssh_port != "22"
