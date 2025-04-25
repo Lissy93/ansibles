@@ -1,0 +1,5 @@
+monit_port: 4001
+monit_bind_address: "0.0.0.0"
+monit_user: "boss"
+monit_password: "changeme420"
+monit_public: false

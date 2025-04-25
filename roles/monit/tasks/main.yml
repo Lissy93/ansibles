@@ -1,0 +1,35 @@
+- name: Install monit
+  apt:
+    name: monit
+    state: present
+    update_cache: yes
+
+- name: Configure monit httpd
+  copy:
+    dest: /etc/monit/conf-enabled/httpd
+    owner: root
+    group: root
+    mode: '0600'
+    content: |
+      set httpd port {{ monit_port }} and
+      use address {{ monit_bind_address }}
+      allow {{ monit_user }}:"{{ monit_password }}"
+
+  notify: Restart monit
+
+- name: Validate monit config
+  command: monit -t
+  changed_when: false
+
+- name: Ensure monit is running and enabled
+  systemd:
+    name: monit
+    enabled: true
+    state: started
+
+- name: Conditionally allow Monit port in UFW
+  ufw:
+    rule: "{{ 'allow' if monit_public else 'deny' }}"
+    port: "{{ monit_port }}"
+    proto: tcp
+  when: monit_bind_address in ['0.0.0.0', '::', '127.0.0.1']

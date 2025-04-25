@@ -1,0 +1,4 @@
+- name: Restart monit
+  systemd:
+    name: monit
+    state: restarted
