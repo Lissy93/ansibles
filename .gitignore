@@ -1,0 +1,52 @@
+# Ansible-specific
+*.retry
+*.log
+*.bak
+*.orig
+*.swp
+*.tmp
+
+# Ignore sensitive or dynamic inventory files
+inventory/*.ini
+inventory/*.yml
+inventory/*.yaml
+inventory/*.json
+!inventory/sample_inventory.yml
+
+# Vault files (plaintext or auto-generated, if not encrypted)
+vault.yml
+group_vars/*/vault.yml
+host_vars/*/vault.yml
+
+# Ignore compiled Python files
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Ignore molecule testing directories
+.molecule/
+
+# Ignore SSH key files
+*.pem
+*.key
+*.pub
+.ssh/
+
+# Ignore system-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore editor/project files
+.idea/
+.vscode/
+*.code-workspace
+
+# Ignore Ansible Galaxy downloads (optional)
+roles/galaxy/
+collections/ansible_collections/
