@@ -1,0 +1,31 @@
+- name: Install Cockpit base package
+  apt:
+    name: cockpit
+    state: present
+    update_cache: true
+
+- name: Install optional Cockpit components if available
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - cockpit-dashboard
+    - cockpit-networkmanager
+    - cockpit-storaged
+    - cockpit-packagekit
+    - cockpit-system
+  ignore_errors: true
+
+
+- name: Ensure cockpit.socket is enabled and started
+  systemd:
+    name: cockpit.socket
+    enabled: true
+    state: started
+
+- name: Conditionally allow Cockpit port in UFW
+  ufw:
+    rule: "{{ 'allow' if cockpit_public else 'deny' }}"
+    port: "{{ cockpit_port }}"
+    proto: tcp
+  when: cockpit_bind_address in ['0.0.0.0', '::', '127.0.0.1']

@@ -6,7 +6,7 @@ AS_ROOT = --extra-vars "ansible_user=root ansible_port=22"
 
 # Before server is setup, login as root, create user, setup SSH
 first-apply:
-	$(ANSIBLE_CMD) $(AS_ROOT)
+	$(ANSIBLE_CMD) $(AS_ROOT) --tags initial
 
 # Then after setup, just make apply
 apply:
@@ -29,3 +29,6 @@ dotfiles:
 	$(ANSIBLE_CMD) $(BECOME) --tags dotfiles
 monit:
 	$(ANSIBLE_CMD) $(BECOME) --tags monit
+cockpit:
+	$(ANSIBLE_CMD) $(BECOME) --tags cockpit
+

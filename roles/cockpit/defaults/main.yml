@@ -1,0 +1,6 @@
+cockpit_port: 9090
+# cockpit_bind_address: "127.0.0.1"   # Can override to "0.0.0.0" if public
+# cockpit_public: false              # Set true to open in firewall
+
+cockpit_bind_address: "0.0.0.0"
+cockpit_public: true
