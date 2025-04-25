@@ -33,20 +33,21 @@
     - role: geerlingguy.docker
       tags: [ docker ]
     - role: users
-      tags: [ users ]
+      tags: [ users, initial ]
     - role: ssh
-      tags: [ ssh ]
+      tags: [ ssh, initial ]
     - role: timezone
-      tags: [ timezone ]
+      tags: [ timezone, initial ]
     - role: hostname
-      tags: [ hostname ]
+      tags: [ hostname, initial ]
     - role: firewall
-      tags: [ firewall ]
+      tags: [ firewall, initial ]
     - role: dotfiles
       tags: [ dotfiles ]
     - role: monit
       tags: [ monit ]
-
+    - role: cockpit
+      tags: [ cockpit ]
 
   tasks:
     - name: Set timezone
