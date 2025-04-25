@@ -48,6 +48,8 @@
       tags: [ monit ]
     - role: cockpit
       tags: [ cockpit ]
+    - role: borg
+      tags: [ borg ]
 
   tasks:
     - name: Set timezone

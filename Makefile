@@ -31,4 +31,6 @@ monit:
 	$(ANSIBLE_CMD) $(BECOME) --tags monit
 cockpit:
 	$(ANSIBLE_CMD) $(BECOME) --tags cockpit
+borg:
+	$(ANSIBLE_CMD) $(BECOME) --tags borg
 

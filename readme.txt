@@ -1,26 +1,31 @@
 INTRO
 -----
 
-This is how I setup and maintain my servers.
+This is how I setup and maintain my servers, with Ansible.
+Everything is nice and easy, automated, repeatable and safe.
 
 Basics:
-- Apt - Updates system, configures aps and upgrades
-- Packages - Installs common packages
-- User accounts - Creates and manages users
-- SSH - Configures and hardens SSH
-- Firewall - Sets UFW rules
-- Timezone - Sets timezone and NTP
-- Hostname - Sets hostname
+- ☑️ Apt - Updates packages, configures repositories and upgrades
+- ☑️ Packages - Installs common packages
+- ☑️ User accounts - Creates user(s) and sets permissions
+- ☑️ SSH - Hardens SSH
+- ☑️ Timezone - Sets timezone and NTP server
+- ☑️ Hostname - Sets hostname and configures hosts
+- ☑️ Mail - Sets up Postfix and Dovecot
 
 Maintenance:
-- Backups - Sets up automated Borg backups
-- Updates - Sets up unattended upgrades
-- Monitoring - Sets up monitoring and alerting
-- Logs - Sets up log rotation and monitoring
+- ☑️ Firewall - Sets UFW rules
+- ☑️ Backups - Sets up automated Borg backups
+- ☑️ Updates - Sets up unattended upgrades
+- ☑️ Monitoring - Sets up monitoring and alerting
+- ☑️ Logs - Sets up log rotation and monitoring
+- ☑️ Fail2ban - Sets up fail2ban
+- ☑️ VPN - Sets up Wireguard VPN
 
 Apps:
-- Docker - Installs and configures Docker
-- Cockpit - Sets up Cockpit and UI
+- ☑️ Docker - Installs and configures Docker
+- ☑️ Cockpit - Sets up Cockpit and management UI
+- ☑️ Proxy - Sets up Caddy (if not already using in docker) 
 
 USAGE
 -----
@@ -31,7 +36,7 @@ STEP 0: PREREQUISITES
 - Ensure you have SSH access to the remote servers
 
 STEP 1: SERVERS
-- Add servers
+- Add servers. Create `inventories/remote.yml`
 
 STEP 2: CONFIGURATION
 - Add variables to `inventories/group_vars/remote.yml`
@@ -62,6 +67,7 @@ Unlike a bash script, and most other automation tools:
    or you can write your own modules in any language you want.
 7. Ansible is simple. No finicky scripts, just self-documenting YAML declarations.
 8. Ansible is powerful. You can do anything from simple tasks to complex orchestration.
+
 
 Read the Ansible docs at:
 https://docs.ansible.com/ansible/latest/getting_started/introduction.html

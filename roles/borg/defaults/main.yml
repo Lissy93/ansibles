@@ -1,0 +1,39 @@
+borg_enabled: true
+
+# Borg SSH
+borg_ssh_key_path: "/home/{{ ansible_user }}/.ssh/borgmatic_ed25519"
+borgbase_apikey: ''
+borgbase_key_name: "{{ ansible_user }}@{{ ansible_hostname }}"
+borg_user: ''
+
+
+# Repo & backup target
+borg_repo: ''   # e.g. kzq6l6xh@kzq6l6xh.repo.borgbase.com:repo
+borg_password: ''
+borg_name: ''
+
+# Backup sources
+borg_source_directories:
+  - /home
+  - /etc
+  - /var/lib
+  - /srv
+
+# Retention
+borg_retention:
+  keep_within: 48H
+  keep_daily: 7
+  keep_weekly: 4
+  keep_monthly: 12
+  keep_yearly: 1
+
+# Compression & ssh
+borg_compression: lz4
+borg_retries: 3
+borg_retry_wait: 60
+
+# Healthchecks
+borg_ping_url: ''
+borg_ping_states: [start, finish, fail]
+
+
