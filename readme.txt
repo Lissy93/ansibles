@@ -83,7 +83,7 @@ Structure:
 ansible/
 ├── ansible.cfg                 # Config file (inventory, roles path, etc)
 ├── playbooks/
-│   ├── bootstrap.yml           # Main setup playbook
+│   ├── all.yml                 # Main setup playbook
 │   └── docker.yml              # Optional specific setup
 ├── inventories/                # Collections of hosts
 │   ├── remote.yml              # Remote production servers
@@ -117,4 +117,25 @@ roles/
 │   └── defaults/
 │       └── main.yml
 
+
+ADDING SERVERS
+--------------
+
+You can specify the file where your inventories (servers to run against) are
+defined within the in ./ansible.cfg file.
+
+Then, create that file, e.g. ./inventories/remote.yml
+The contents of which should look like this:
+
+all:
+  hosts:
+    my-server:
+      ansible_host: 111.111.111.111
+      ansible_user: bob
+      ansible_python_interpreter: /usr/bin/python3
+    my-other-server:
+      ansible_host: 000.000.000.000
+      ansible_user: alice
+      ansible_port: 22
+      ansible_python_interpreter: /usr/bin/python3
 

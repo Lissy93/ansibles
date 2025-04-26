@@ -1,6 +1,6 @@
-.PHONY: first-apply apply docker users ssh timezone hostname firewall dotfiles monit
+.PHONY: first-apply apply docker users ssh timezone hostname firewall dotfiles monit 
 
-ANSIBLE_CMD = ansible-playbook playbooks/bootstrap.yml
+ANSIBLE_CMD = ansible-playbook playbooks/all.yml
 BECOME = --ask-become-pass
 AS_ROOT = --extra-vars "ansible_user=root ansible_port=22"
 
@@ -15,6 +15,8 @@ apply:
 # Or, to run just one specific role
 docker:
 	$(ANSIBLE_CMD) $(BECOME) --tags docker
+timezone:
+	$(ANSIBLE_CMD) $(BECOME) --tags timezone
 users:
 	$(ANSIBLE_CMD) $(BECOME) --tags users
 ssh:
@@ -25,6 +27,8 @@ hostname:
 	$(ANSIBLE_CMD) $(BECOME) --tags hostname
 firewall:
 	$(ANSIBLE_CMD) $(BECOME) --tags firewall
+fail2ban:
+	$(ANSIBLE_CMD) $(BECOME) --tags fail2ban
 dotfiles:
 	$(ANSIBLE_CMD) $(BECOME) --tags dotfiles
 monit:
@@ -33,4 +37,12 @@ cockpit:
 	$(ANSIBLE_CMD) $(BECOME) --tags cockpit
 borg:
 	$(ANSIBLE_CMD) $(BECOME) --tags borg
+maldet:
+	$(ANSIBLE_CMD) $(BECOME) --tags maldet
+lynis:
+	$(ANSIBLE_CMD) $(BECOME) --tags lynis
 
+
+# Run a specific role
+role %:
+	ansible-playbook playbooks/run-role.yml -e "role_to_run=$*" $(BECOME)
