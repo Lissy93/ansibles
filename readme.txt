@@ -90,18 +90,6 @@ STEP 4: RUNNING
   - First run: `make first-apply`
   - Subsequent runs: `make apply`
   
-- Alternatively, you can run ansible commands directly for more control. For example:
-  - Run a playbook on specific servers:
-    > ansible-playbook -i inventories/<hosts>.yml playbooks/<playbook>.yml
-  - Run only roles with a specific tag:
-    > ansible-playbook -i inventories/<hosts>.yml playbooks/<play>.yml --tags <tag>
-  - Run a playbook on a specific server:
-    > ansible-playbook -i inventories/<hosts>.yml playbooks/<play>.yml -l <servers>
-  - Do a dry-run, and preview what changes will be made before applying:
-    > ansible-playbook -i inventories/<hosts>.yml playbooks/<play>.yml --check --diff
-  - Run an ad-hoc command on servers in an inventory:
-    > ansible db -i inventories/<hosts>.yml -m shell -a "<shell command>"
-
 ================================================================================
 
 ADDING SERVERS 🖥️
@@ -166,6 +154,7 @@ Terminology:
 - Playbooks = What to do (at a high level, collection of roles)
 - Roles = Reusable collections of logic, made up of tasks
 
+Structure:
 Ansible projects follow a specific directory structure.
 Warning: There's a lot of directories and main.yml files!
 (This can be customized in ansible.cfg, but best to use standard layout)
@@ -204,12 +193,20 @@ ansible/                             # ── Top-level project directory
 │   │   └── (same sub-dirs as above)
 │   └── database/                    # ── Role for DB setup (Postgres/MySQL/etc.)
 │       └── (…)
-├── scripts/                         # ── Helper scripts (e.g. inventory generators)
-│   └── dynamic_inventory.py         #     ── Python script for a dynamic inventory source
-├── group_vars/                      # ── Legacy/global group-vars (if not under inventories/)
-│   └── all.yml
-└── host_vars/                       # ── Legacy/global host-vars (if not under inventories/)
-    └── example.com.yml
+└── scripts/                         # ── Helper scripts (e.g. inventory generators)
+    └── dynamic_inventory.py         #
+
+Commands:
+- Run a playbook on specific servers:
+  > ansible-playbook -i inventories/<hosts>.yml playbooks/<playbook>.yml
+- Run only roles with a specific tag:
+  > ansible-playbook -i inventories/<hosts>.yml playbooks/<play>.yml --tags <tag>
+- Run a playbook on a specific server:
+  > ansible-playbook -i inventories/<hosts>.yml playbooks/<play>.yml -l <servers>
+- Do a dry-run, and preview what changes will be made before applying:
+  > ansible-playbook -i inventories/<hosts>.yml playbooks/<play>.yml --check --diff
+- Run an ad-hoc command on servers in an inventory:
+  > ansible db -i inventories/<hosts>.yml -m shell -a "<shell command>"
 
 ================================================================================
 
