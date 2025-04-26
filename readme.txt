@@ -11,46 +11,48 @@ The following tasks (roles) are performed on each server,
 to take it from zero to full-configured, usable and secure.
 Only the basics are required, the rest are optional.
 
-Basics:
-- ☑️ Apt - Configures repositories and updates packages
-- ☑️ Packages - Installs common packages
-- ☑️ User accounts - Creates user(s) and sets permissions
-- ☑️ SSH - Configures and hardens SSH access
-- ☑️ Timezone - Sets timezone and NTP server
-- ☑️ Hostname - Sets hostname and configures hosts
-- ☑️ Mail - Sets up Postfix (for notification sending)
-- ☑️ Updates - Sets up unattended upgrades
+➡️ ESSENTIAL TASKS:
+ ⚒️ Basics:
+  ├── ☑️ Apt - Configures repositories and updates packages
+  ├── ☑️ Packages - Installs common packages
+  ├── ☑️ User accounts - Creates user(s) and sets permissions
+  ├── ☑️ SSH - Configures and hardens SSH access
+  ├── ☑️ Timezone - Sets timezone and NTP server
+  ├── ☑️ Hostname - Sets hostname and configures hosts
+  ├── ☑️ Mail - Sets up Postfix (for notification sending)
+  └── ☑️ Updates - Sets up unattended upgrades
 
-Extras:
-- ☑️ Dotfiles - Configures settings for CLI utils and apps
+➡️ OPTIONAL TASKS:
+ ⚙️ Extras:
+  └── ☑️ Dotfiles - Configures settings for CLI utils and apps
 
-Backups:
-- ☑️ Backups - Sets up automated Borg backups
+ 💾 Backups
+  └── ☑️ Backups - Sets up automated Borg backups
 
-Access:
-- ☑️ VPN - Sets up Wireguard VPN
-- ☑️ Cockpit - Sets up Cockpit and management UI
+ 🔑 Access:
+  ├── ☑️ VPN - Sets up Wireguard VPN
+  └── ☑️ Cockpit - Sets up Cockpit and management UI
 
-Apps and Services:
-- ☑️ Docker - Installs and configures Docker
-- ☑️ Proxy - Sets up Caddy (only if not using Docker)
+ 🖥️ Apps and Services
+  ├── ☑️ Docker - Installs and configures Docker
+  └── ☑️ Proxy - Sets up Caddy (only if not using Docker)
 
-Security:
-- ☑️ Firewall - Sets UFW rules
-- ☑️ System hardening - Implements some DevSec security baselines
-- ☑️ AppArmor - Sets up profiles for process confinement
-- ☑️ Intrusion detection - Configures Fail2ban
-- ☑️ Integrity monitoring - Sets up and automates OSSEC
-- ☑️ Malware scanning - Sets up daily Maldet scans and reporting
-- ☑️ Security audits - Enables daily Lynis audits and reporting
+ 🔒 Security:
+  ├── ☑️ Firewall - Sets UFW rules
+  ├── ☑️ System hardening - Implements some DevSec security baselines
+  ├── ☑️ AppArmor - Sets up profiles for process confinement
+  ├── ☑️ Intrusion detection - Configures Fail2ban
+  ├── ☑️ Integrity monitoring - Sets up and automates OSSEC
+  ├── ☑️ Malware scanning - Sets up daily Maldet scans and reporting
+  └── ☑️ Security audits - Enables daily Lynis audits and reporting
 
-Monitoring:
-- ☑️ Log storage – Loki for ingesting and aggregating all logs
-- ☑️ Log shipping – Grafana Agent, pushes logs and metrics to Loki
-- ☑️ Metrics collection – Grafana Agent pushing metrics into Prometheus
-- ☑️ Visualization – Grafana for dashboards from Loki and Prometheus
-- ☑️ Alerting – Alertmanager for triggering critical notifications
-- ☑️ Log rotation - Sets up logrotate for all logs
+ 📊 Monitoring:
+  ├── ☑️ Log storage – Loki for ingesting and aggregating all logs
+  ├── ☑️ Log shipping – Grafana Agent, pushes logs and metrics to Loki
+  ├── ☑️ Metrics collection – Grafana Agent pushing metrics into Prometheus
+  ├── ☑️ Visualization – Grafana for dashboards from Loki and Prometheus
+  ├── ☑️ Alerting – Alertmanager for triggering critical notifications
+  └── ☑️ Log rotation - Sets up logrotate for all logs
 
 Running:
 - `make essentials` will only apply the basics (essential for all servers)
