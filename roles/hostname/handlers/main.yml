@@ -1,0 +1,6 @@
+- name: Reboot if needed
+  ansible.builtin.reboot:
+    msg: "Rebooting to apply hostname change"
+    connect_timeout: 5
+    reboot_timeout: 600
+  when: reboot_after_hostname_change | bool

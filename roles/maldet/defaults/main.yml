@@ -1,0 +1,21 @@
+# roles/maldet/defaults/main.yml
+
+maldet_enabled: true
+
+maldet_install_path: /opt/maldetect
+maldet_scan_paths:
+  - /home
+  - /var/www
+  - /srv
+
+maldet_email_alert: false
+maldet_email_address: ""
+maldet_daily_cron: true
+maldet_quarantine_hits: false
+
+# You can later extend with auto-quarantine, inotify monitoring, etc if needed
+
+
+maldet_download_path: /tmp/maldetect-latest.tar.gz
+maldet_extract_path: /tmp/maldetect-*
+

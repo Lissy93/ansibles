@@ -6,161 +6,119 @@
         (borg_password | default('') | length > 0) and
         (borgbase_apikey | default('') | length > 0) }}
 
-- name: Read key from file
-  slurp:
-    src: "{{ borg_ssh_key_path }}"
-  register: ssh_key
-  check_mode: yes
+- name: Setup Borg backup
+  block:
+    - name: Skip if essential Borg variables are missing
+      debug:
+        msg: "⚠️  Skipping Borg setup due to missing variables"
+      when: not borg_should_run
 
+    - name: Create SSH key if it doesn't exist
+      openssh_keypair:
+        path: "{{ borg_ssh_key_path }}"
+        type: ed25519
+        comment: "{{ borgbase_key_name }}"
+        force: false
 
-- name: Skip if essential Borg variables are missing
-  debug:
-    msg: "⚠️  Skipping Borg setup due to missing variables"
-  when: not borg_should_run
+    - name: 📢 Prompt user to back up private SSH key
+      debug:
+        msg: |
+          📢 Don't forget to back up your Borg SSH private key:
+          > cat {{ borg_ssh_key_path }}
+          You'll need it to restore from backup if this server is lost.
+      run_once: true
 
-- name: Create SSH key if it doesn't exist
-  openssh_keypair:
-    path: "{{ borg_ssh_key_path }}"
-    type: ed25519
-    comment: "{{ borgbase_key_name }}"
-    force: false
+    - name: Read public key
+      slurp:
+        src: "{{ borg_ssh_key_path }}.pub"
+      register: borg_pubkey
+      check_mode: yes
+
+    - name: Register SSH key with BorgBase
+      adhawkins.borgbase.borgbase_ssh:
+        state: present
+        apikey: "{{ borgbase_apikey }}"
+        name: "{{ borgbase_key_name }}"
+        key: "{{ borg_pubkey['content'] | b64decode }}"
+      register: borgbase_key_result
+
+    - name: Create BorgBase repository
+      adhawkins.borgbase.borgbase_repo:
+        state: present
+        email: "{{ user_email }}"
+        password: "{{ borg_password }}"
+        name: "{{ borg_repo_name }}"
+        full_access_keys:
+          - "{{ borgbase_key_result.key_id }}"
+        quota_enabled: false
+        alert_days: 2
+      register: borgbase_repo
+
+    - name: Set borgbase repo id
+      set_fact:
+        borgbackup_borgbase_repo: "{{ borgbase_repo.repo.repo_id }}"
+      when: borgbase_repo.repo.repo_id is defined
+
+    - name: Set borgbackup_ssh_host
+      set_fact:
+        borgbackup_ssh_host: "{{ borgbackup_borgbase_repo }}.repo.borgbase.com"
+      when: borgbackup_borgbase_repo is defined
+
+    - name: Ensure borgmatic is installed
+      apt:
+        name: borgmatic
+        update_cache: yes
+        state: present
+
+    - name: Create borgmatic config directory
+      file:
+        path: /etc/borgmatic
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Write borgmatic config
+      copy:
+        dest: /etc/borgmatic/config.yaml
+        owner: root
+        group: root
+        mode: '0600'
+        content: |
+          location:
+            source_directories:
+          {% for path in borg_source_directories %}
+            - {{ path }}
+          {% endfor %}
+
+          repositories: [ '{{ borg_repo }}' ]
+
+          storage:
+            encryption_passphrase: "{{ borg_password }}"
+            compression: {{ borg_compression }}
+            retries: {{ borg_retries }}
+            retry_wait: {{ borg_retry_wait }}
+            ssh_command: ssh -i {{ borg_ssh_key_path }}
+
+          retention:
+          {% for key, value in borg_retention.items() %}
+            {{ key }}: {{ value }}
+          {% endfor %}
+
+          {% if borg_ping_url %}
+          hooks:
+            healthchecks:
+              ping_url: {{ borg_ping_url }}
+              send_logs: true
+              ping_body_limit: 100000
+              states: {{ borg_ping_states }}
+          {% endif %}
+
+    - name: Enable borgmatic systemd timer
+      systemd:
+        name: borgmatic.timer
+        enabled: yes
+        state: started
+
   when: borg_should_run
   tags: [borg]
-
-- name: 📢 Prompt user to back up private SSH key
-  debug:
-    msg: |
-      📢 Don't forget to back up your Borg SSH private key:
-      > cat {{ borg_ssh_key_path }}
-      You'll need it to restore from backup if this server is lost.
-  when: borg_should_run
-  tags: [borg]
-  run_once: true
-
-- name: Read public key
-  slurp:
-    src: "{{ borg_ssh_key_path }}.pub"
-  register: borg_pubkey
-  check_mode: yes
-  when: borg_should_run
-  tags: [borg]
-
-- name: Create BorgBase repository
-  adhawkins.borgbase.borgbase_repo:
-    state: present
-    email: "{{ user_email }}"
-    password: "{{ borg_password }}"
-    name: "{{ borg_repo_name }}"
-    full_access_keys:
-      - "{{ borgbase_key.key_id }}"
-    quota_enabled: false
-    alert_days: 2
-  register: borgbase_repo
-  when: borg_should_run
-  tags: [borg]
-
-- name: Set borgbase repo id
-  set_fact:
-    borgbackup_borgbase_repo: "{{ borgbase_repo.repo_id }}"
-  when:
-    - borg_should_run
-    - borgbase_repo is defined
-    - borgbase_repo.repo_id is defined
-
-
-- name: Set borgbackup_ssh_host
-  set_fact:
-    borgbackup_ssh_host: "{{ borgbackup_borgbase_repo }}.repo.borgbase.com"
-  when:
-    - borg_should_run
-    - borgbackup_borgbase_repo is defined
-
-- name: Register SSH key with BorgBase
-  adhawkins.borgbase.borgbase_ssh:
-    state: present
-    apikey: "{{ borgbase_apikey }}"
-    name: "{{ borgbase_key_name }}"
-    key: "{{ borgbase_key['content'] | b64decode }}"
-  register: borgbase_key
-  when: borg_should_run
-  tags: [borg]
-
-- name: Attach SSH key to BorgBase repository
-  adhawkins.borgbase.borgbase_repo:
-    apikey: "{{ borgbase_apikey }}"
-    id: "{{ borgbase_repo.repo_id }}"
-    append_only_keys:
-      - "{{ borgbase_key_result.key_id }}"
-  when:
-    - borg_should_run
-    - borgbase_repo is defined
-    - borgbase_repo.repo_id is defined
-    - borgbase_key_result is defined
-    - borgbase_key_result.key_id is defined
-  tags: [borg]
-
-
-- name: Ensure borgmatic is installed
-  apt:
-    name: borgmatic
-    update_cache: yes
-    state: present
-  tags: [borg]
-  when: borg_should_run
-
-- name: Create borgmatic config directory
-  file:
-    path: /etc/borgmatic
-    state: directory
-    owner: root
-    group: root
-    mode: '0755'
-  tags: [borg]
-  when: borg_should_run
-
-- name: Write borgmatic config
-  copy:
-    dest: /etc/borgmatic/config.yaml
-    owner: root
-    group: root
-    mode: '0600'
-    content: |
-      location:
-        source_directories:
-        {% for path in borg_source_directories %}
-          - {{ path }}
-        {% endfor %}
-
-      repositories: [ '{{ borg_repo }}' ]
-
-      storage:
-        encryption_passphrase: "{{ borg_password }}"
-        compression: {{ borg_compression }}
-        retries: {{ borg_retries }}
-        retry_wait: {{ borg_retry_wait }}
-        ssh_command: ssh -i {{ borg_ssh_key_path }}
-
-      retention:
-      {% for key, value in borg_retention.items() %}
-        {{ key }}: {{ value }}
-      {% endfor %}
-
-      {% if borg_ping_url %}
-      hooks:
-        healthchecks:
-          ping_url: {{ borg_ping_url }}
-          send_logs: true
-          ping_body_limit: 100000
-          states: {{ borg_ping_states }}
-      {% endif %}
-  tags: [borg]
-  when: borg_should_run
-
-- name: Enable borgmatic systemd timer
-  systemd:
-    name: borgmatic.timer
-    enabled: yes
-    state: started
-  tags: [borg]
-  when: borg_should_run
-

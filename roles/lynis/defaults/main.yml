@@ -1,0 +1,13 @@
+# defaults for Lynis role
+
+lynis_enabled: true
+
+lynis_install_from_repo: true  # if true, use apt/yum/etc; if false, download manually
+
+lynis_scan_paths:
+  - /
+lynis_scan_verbose: true
+lynis_scan_report: true
+lynis_scan_custom_options: ""  # Any extra lynis parameters
+
+lynis_package_name: lynis

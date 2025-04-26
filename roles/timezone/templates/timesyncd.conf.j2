@@ -1,0 +1,5 @@
+# /etc/systemd/timesyncd.conf
+[Time]
+{% for server in ntp_servers %}
+NTP={{ server }}
+{% endfor %}

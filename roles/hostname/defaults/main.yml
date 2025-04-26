@@ -1,0 +1,9 @@
+hostname_set: true       # Whether to set hostname (allow skipping easily)
+
+hostname_name: "{{ inventory_hostname }}"   # Default: inventory hostname
+hostname_fqdn: ""        # Optional full domain (e.g., server.example.com)
+
+update_hosts_file: true  # Whether to update /etc/hosts
+hosts_file_content: []   # Optional custom entries for /etc/hosts
+
+reboot_after_hostname_change: false  # Optional reboot if hostname changed

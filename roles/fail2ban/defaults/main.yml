@@ -1,0 +1,15 @@
+fail2ban_enabled: true
+fail2ban_service_name: fail2ban
+fail2ban_bantime: 600       # Seconds (default: 10 minutes)
+fail2ban_findtime: 600      # How far back to look for failures (seconds)
+fail2ban_maxretry: 5        # How many failures before ban
+fail2ban_ignoreip: []       # List of IPs to ignore (whitelisted)
+fail2ban_jails:             # List of enabled jails
+  - name: sshd
+    enabled: true
+    port: ssh
+    logpath: /var/log/auth.log
+    backend: systemd
+    maxretry: "{{ fail2ban_maxretry }}"
+    bantime: "{{ fail2ban_bantime }}"
+    findtime: "{{ fail2ban_findtime }}"

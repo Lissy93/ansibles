@@ -1,0 +1,46 @@
+# fail2ban/tasks/main.yml
+
+- name: "⚡ Fail2Ban Setup - Skipping because disabled"
+  debug:
+    msg: "⚡ Skipping Fail2Ban setup because 'fail2ban_enabled' is false."
+  when: not fail2ban_enabled
+  tags: [fail2ban]
+
+- name: Install Fail2Ban
+  apt:
+    name: fail2ban
+    state: present
+    update_cache: yes
+  when: fail2ban_enabled
+  tags: [fail2ban]
+
+- name: Ensure fail2ban service is enabled and running
+  systemd:
+    name: "{{ fail2ban_service_name }}"
+    enabled: true
+    state: started
+  when: fail2ban_enabled
+  tags: [fail2ban]
+
+- name: Create fail2ban local jail configuration
+  template:
+    src: jail.local.j2
+    dest: /etc/fail2ban/jail.local
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Fail2Ban
+  when: fail2ban_enabled
+  tags: [fail2ban]
+
+- name: Configure ignoreip if provided
+  lineinfile:
+    path: /etc/fail2ban/jail.local
+    regexp: '^ignoreip ='
+    line: "ignoreip = {{ fail2ban_ignoreip | join(' ') }}"
+    state: present
+  when:
+    - fail2ban_enabled
+    - fail2ban_ignoreip | length > 0
+  tags: [fail2ban]
+

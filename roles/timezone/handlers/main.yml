@@ -1,0 +1,4 @@
+- name: Restart NTP
+  ansible.builtin.service:
+    name: "{{ ntp_package }}"
+    state: restarted

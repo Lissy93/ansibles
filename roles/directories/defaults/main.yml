@@ -1,0 +1,13 @@
+server_structure_enabled: true
+
+server_directories:
+  - /srv
+  - /srv/infra
+  - /srv/infra/stack
+  - /srv/infra/stack/apps
+  - /srv/infra/stack/data
+
+server_directory_owner: "{{ srv_owner | default(new_user | default('root')) }}"
+server_directory_group: "{{ srv_group | default(new_user | default('root')) }}"
+
+server_directory_mode: '0755'

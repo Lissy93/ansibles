@@ -1,0 +1,48 @@
+---
+
+- name: "Skip Lynis setup if not enabled"
+  ansible.builtin.debug:
+    msg: "⚠️  Skipping Lynis setup because lynis_enabled is false"
+  when: not lynis_enabled
+  tags: [lynis]
+
+- name: "Install Lynis via package manager"
+  ansible.builtin.package:
+    name: "{{ lynis_package_name }}"
+    state: present
+  when: lynis_enabled and lynis_install_from_repo
+  tags: [lynis]
+
+- name: "Download Lynis manually if not installing via package manager"
+  ansible.builtin.get_url:
+    url: https://downloads.cisofy.com/lynis/lynis-3.0.8.tar.gz
+    dest: /tmp/lynis-latest.tar.gz
+    mode: '0644'
+  when: lynis_enabled and not lynis_install_from_repo
+  tags: [lynis]
+
+- name: "Extract Lynis manually"
+  ansible.builtin.unarchive:
+    src: /tmp/lynis-latest.tar.gz
+    dest: /opt/
+    remote_src: yes
+  when: lynis_enabled and not lynis_install_from_repo
+  tags: [lynis]
+
+- name: "Run Lynis security audit"
+  ansible.builtin.command: >
+    lynis audit system
+    {% if lynis_scan_verbose %} --verbose {% endif %}
+    {% if not lynis_scan_report %} --no-log --no-report {% endif %}
+    {{ lynis_scan_custom_options }}
+  register: lynis_scan
+  changed_when: false
+  when: lynis_enabled
+  tags: [lynis]
+
+- name: "Show Lynis report summary"
+  ansible.builtin.debug:
+    var: lynis_scan.stdout_lines
+  when: lynis_enabled
+  tags: [lynis]
+

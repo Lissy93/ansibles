@@ -1,0 +1,6 @@
+- name: Restart Fail2Ban
+  ansible.builtin.systemd:
+    name: "{{ fail2ban_service_name }}"
+    state: restarted
+  listen: Restart Fail2Ban
+  tags: [fail2ban]

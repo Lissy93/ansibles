@@ -1,0 +1,11 @@
+timezone_name: "UTC"    # Default timezone
+timezone_force: false   # Force re-set timezone even if correct
+
+ntp_enabled: true       # Whether to install and enable NTP
+ntp_mode: "chrony"      # NTP mode (chrony or ntp)
+ntp_package: "ntp"      # Package name (or chrony if you want to switch)
+ntp_servers: []         # Custom NTP servers, optional
+
+sync_time_now: true     # Whether to sync time immediately after setup
+
+ntp_service_chrony: chronyd

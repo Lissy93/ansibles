@@ -1,0 +1,43 @@
+- name: Set system hostname
+  ansible.builtin.hostname:
+    name: "{{ hostname_name }}"
+  when:
+    - hostname_set | bool
+    - hostname_name is defined
+
+- name: Configure /etc/hostname
+  ansible.builtin.copy:
+    dest: /etc/hostname
+    owner: root
+    group: root
+    mode: '0644'
+    content: "{{ hostname_name }}\n"
+  when:
+    - hostname_set | bool
+    - hostname_name is defined
+
+- name: Configure /etc/hosts if requested
+  ansible.builtin.copy:
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      127.0.0.1   localhost
+      127.0.1.1   {{ hostname_name }} {{ hostname_fqdn | default('') }}
+      {% for entry in hosts_file_content %}
+      {{ entry }}
+      {% endfor %}
+  when:
+    - hostname_set | bool
+    - update_hosts_file | bool
+
+- name: Restart hostname service if needed (optional)
+  ansible.builtin.service:
+    name: systemd-hostnamed
+    state: restarted
+  when:
+    - hostname_set | bool
+    - ansible_service_mgr == 'systemd'
+  notify: Reboot if needed
+
