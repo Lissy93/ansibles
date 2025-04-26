@@ -1,5 +1,0 @@
-- name: Configure firewall with UFW
-  hosts: servers
-  become: true
-  roles:
-    - firewall

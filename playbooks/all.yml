@@ -3,7 +3,6 @@
   hosts: all
   become: true
   vars:
-    timezone: Europe/London
     hostname: "{{ inventory_hostname }}"
     user_name: alicia
     new_user: alicia
@@ -11,7 +10,6 @@
     srv_owner: alicia
     srv_group: alicia
     password: "{{ user_password | password_hash('sha512') }}"
-    # user_ssh_key_path: ''
     docker_users:
       - alicia
 
@@ -30,18 +28,22 @@
 
   roles:
     - role: common
-    - role: geerlingguy.docker
-      tags: [ docker ]
-    - role: users
-      tags: [ users, initial ]
-    - role: ssh
-      tags: [ ssh, initial ]
-    - role: timezone
-      tags: [ timezone, initial ]
     - role: hostname
       tags: [ hostname, initial ]
+    - role: directories
+      tags: [ directories, initial ]
+    - role: users
+      tags: [ users, initial, essential ]
+    - role: ssh
+      tags: [ ssh, initial, security, essential ]
+    - role: timezone
+      tags: [ timezone, initial ]
     - role: firewall
-      tags: [ firewall, initial ]
+      tags: [ firewall, initial, security, essential ]
+    - role: fail2ban
+      tags: [ fail2ban, security ]
+    - role: geerlingguy.docker
+      tags: [ docker ]
     - role: dotfiles
       tags: [ dotfiles ]
     - role: monit
@@ -49,30 +51,12 @@
     - role: cockpit
       tags: [ cockpit ]
     - role: borg
-      tags: [ borg ]
+      tags: [ borg, backups ]
+    - role: maldet
+      tags: [ maldet, security ]
+    - role: lynis
+      tags: [ lynis, security ]
 
-  tasks:
-    - name: Set timezone
-      ansible.builtin.timezone:
-        name: "{{ timezone }}"
-
-    - name: Set hostname
-      ansible.builtin.hostname:
-        name: "{{ hostname }}"
-
-    - name: Ensure /srv and /srv/infra directories exist and are owned by {{ user_name }}
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: directory
-        owner: "{{ srv_owner }}"
-        group: "{{ srv_group }}"
-        mode: '0755'
-      loop:
-        - /srv
-        - /srv/infra
-        - /srv/infra/stack
-        - /srv/infra/stack/apps
-        - /srv/infra/stack/data
 
 - name: Check if user can connect with Ansible
   hosts: all
@@ -83,11 +67,3 @@
     - name: Confirm login is working and set user_ready flag
       set_fact:
         user_ready: true
-
-- name: Lock down SSH (disable root login and password auth)
-  hosts: all
-  become: true
-  vars:
-    user_ready: true
-  roles:
-    - role: ssh  # Re-applies config, this time disables root login

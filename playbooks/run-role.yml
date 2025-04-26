@@ -1,0 +1,17 @@
+# Runs one specific role, specified by the `role_to_run` variable.
+# E.g. `ansible-playbook playbooks/run-role.yml -e role_to_run=firewall`
+- hosts: all
+  become: true
+  vars:
+    role_to_run: null
+
+  pre_tasks:
+    - name: fail if no role_to_run supplied
+      assert:
+        that: role_to_run is not none
+        fail_msg: "You must pass -e role_to_run=<your_role_name>"
+
+  tasks:
+    - name: include requested role
+      include_role:
+        name: "{{ role_to_run }}"
