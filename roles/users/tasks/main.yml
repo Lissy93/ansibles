@@ -1,3 +1,8 @@
+- name: Ensure docker group exists
+  group:
+    name: docker
+    state: present
+
 - name: Create user
   user:
     name: "{{ new_user }}"
@@ -6,7 +11,7 @@
     append: yes
     state: present
     create_home: yes
-    password: "{{ password }}"
+    password: "{{ user_password | password_hash('sha512') }}"
   when: user_password is defined
 
 - name: Set up authorized SSH key

@@ -5,7 +5,7 @@
     mode: '0700'
     owner: "{{ new_user }}"
     group: "{{ new_user }}"
-  when: new_user is defined
+  when: new_user is defined and not ssh_lockdown | default(false)
 
 - name: Ensure ~/.ssh/authorized_keys exists with correct permissions
   ansible.builtin.file:
@@ -14,14 +14,14 @@
     mode: '0600'
     owner: "{{ new_user }}"
     group: "{{ new_user }}"
-  when: new_user is defined
+  when: new_user is defined and not ssh_lockdown | default(false)
 
 - name: Allow SSH on configured port
   ufw:
     rule: allow
     port: "{{ ssh_port }}"
     proto: tcp
-
+  when: not ssh_lockdown | default(false)
 
 - name: Harden SSH config
   lineinfile:
@@ -49,9 +49,10 @@
     - { key: 'Ciphers',                 value: 'aes128-ctr,aes192-ctr,aes256-ctr' }
     - { key: 'MACs',                    value: 'hmac-sha2-256,hmac-sha2-512' }
   notify: Restart SSH
+  when: not ssh_lockdown | default(false)
   changed_when: true
 
-- name: Disable root login only if user_ready is true
+- name: Disable root login
   lineinfile:
     path: /etc/ssh/sshd_config
     regexp: "{{ item.regexp }}"
@@ -62,9 +63,35 @@
     - { regexp: '^PermitRootLogin',         line: 'PermitRootLogin no' }
     - { regexp: '^PasswordAuthentication',  line: 'PasswordAuthentication no' }
     - { regexp: '^ChallengeResponseAuthentication', line: 'ChallengeResponseAuthentication no' }
-  when: user_ready | default(false)
+  when: user_ready | default(false) and not ssh_lockdown | default(false)
   notify: Restart SSH
   changed_when: true
+  tags:
+    - lockdown
+
+
+- name: Update SSH port
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?\s*PasswordAuthentication\s+.*'
+    line: 'PasswordAuthentication no'
+    validate: 'sshd -T -f %s'
+  loop:
+    - { regexp: '^Port', line: 'Port {{ ssh_port }}' }
+  when: ssh_lockdown | default(false)
+  tags:
+    - lockdown
+
+- name: Disable password authentication
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?\s*PasswordAuthentication\s+.*'
+    line: 'PasswordAuthentication no'
+    validate: 'sshd -T -f %s'
+  when: not ssh_lockdown | default(false)
+  tags:
+    - lockdown
+
 
 - name: Secure SSH private keys
   file:
@@ -72,7 +99,7 @@
     mode: '0600'
   with_fileglob:
     - /etc/ssh/*key
-  when: item is not search(".*\\.pub$")
+  when: item is not search(".*\\.pub$") and not ssh_lockdown | default(false)
 
 - name: Secure SSH public keys
   file:
@@ -80,6 +107,7 @@
     mode: '0644'
   with_fileglob:
     - /etc/ssh/*.pub
+  when: item is search(".*\\.pub$") and not ssh_lockdown | default(false)
 
 - name: Disable systemd ssh.socket (if enabled)
   ansible.builtin.systemd:
@@ -87,6 +115,7 @@
     state: stopped
     enabled: no
   become: true
+  when: not ssh_lockdown | default(false)
 
 - name: Enable ssh.service explicitly
   ansible.builtin.systemd:
@@ -94,6 +123,8 @@
     state: restarted
     enabled: yes
   become: true
+  when: not ssh_lockdown | default(false)
 
 - name: Restart SSH to apply config
   ansible.builtin.meta: flush_handlers
+  when: not ssh_lockdown | default(false)

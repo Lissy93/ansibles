@@ -37,12 +37,12 @@
     {{ lynis_scan_custom_options }}
   register: lynis_scan
   changed_when: false
-  when: lynis_enabled
+  when: lynis_enabled and run_scan | default(false)
   tags: [lynis]
 
 - name: "Show Lynis report summary"
   ansible.builtin.debug:
     var: lynis_scan.stdout_lines
-  when: lynis_enabled
+  when: lynis_enabled and run_scan | default(false)
   tags: [lynis]
 
