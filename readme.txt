@@ -1,8 +1,16 @@
 
 INTRO 👋
 --------
-This is how I setup and maintain my servers, with Ansible.
-It makes everything is nice 'n easy, automated, repeatable and safe.
+This is how I setup and maintain all my servers (VPSs, VMs, boxes, etc).
+So they're all configured correctly, secured, backed up, monitored and usable.
+
+Thanks to Ansible, everything is nice 'n easy, automated, repeatable and safe 😊
+
+The readme contains:
+- List of all playbooks and roles, and what they each do
+- Pointers for getting started with Ansible, what it is, and why use it
+- Setup and usage guide for this repo, and catalog of available commands
+- Some helpful info, that you should deffo read before continuing!
 
 ================================================================================
 
@@ -10,7 +18,7 @@ JOBS 👔
 -------
 The following tasks (roles) are performed on each server,
 to take it from zero to full-configured, usable and secure.
-Only the basics are required, the rest are optional.
+Only the "Essentials" are required, the rest are optional.
 
 ➡️ RECOMMENDED TASKS:
  ⚒️ Essentials:
@@ -62,9 +70,11 @@ Running:
 - `make first-apply` should be used for the first run (logs in as root)
 - `make [category]` or `make [role]` will run a specific category or role
 
-Notes:
-- Caddy, Grafana and Alertmanager can be skipped servers where Docker is used,
-  as they can (and should) run within containers instead.
+Note about Docker:
+On servers where Docker is used for deploying services, some of the apps above
+can/will be skipped. Such as Caddy, Grafana and Alertmanager
+Because it's better to run them in containers instead of directly on the host.
+For the Docker stacks, see my compose in: https://github.com/Lissy93/dockyard
 
 ================================================================================
 
@@ -79,11 +89,8 @@ STEP 1: SERVERS
 - Add servers. Create `inventories/remote.yml`
 
 STEP 2: CONFIGURATION
-- Add variables to `inventories/group_vars/remote.yml`
-- Best to put secrete variables in an Ansible vault
-  1. Create a vault: ansible-vault create ./inventories/group_vars/vault.yml
-  2. Edit the vault: ansible-vault edit ./inventories/group_vars/vault.yml
-  3. Use the vault by adding the --ask-vault-pass flag when running a playbook
+- Add variables to `inventories/group_vars/remote.yml` or `all.yml` (shared)
+- Best to put secrete variables in an Ansible vault (see instructions below)
 
 STEP 4: RUNNING
 - Use the commands in the Makefile to execute the playbooks.
@@ -138,6 +145,9 @@ ADDING VARIABLES 🗂️
 - But you can (and should) override in:  ./inventories/group_vars/all.yml
 - Or, set host-specific vars, in:  ./inventories/host_vars/<hostname>.yml
 - Secrets should be stored in a vault: ./inventories/group_vars/vault.yml
+  1. Create a vault: `ansible-vault create ./inventories/group_vars/vault.yml`
+  2. Edit the vault: `ansible-vault edit ./inventories/group_vars/vault.yml`
+  3. Use the vault by adding the `--ask-vault-pass` flag when running a playbook
 
 ================================================================================
 
@@ -170,15 +180,16 @@ https://docs.ansible.com/ansible/latest/getting_started/introduction.html
 ANSIBLE BASICS 📚
 -----------------
 Terminology:
-- Inventories = Who to configure (which hosts)
+- Inventories = Who to configure (a list of hosts/servers)
 - Playbooks = What to do (at a high level, collection of roles)
 - Roles = Reusable collections of logic, made up of tasks
+- Tasks = The actual code that Ansible runs (usually YAML)
+- Plugins = Reusable code snippets (usually Python) that extend Ansible
+- Vars = Variables used to specify values for each playbook/role/task
+- ansible.cfg = The config file that tells Ansible where to find things
 
 Structure:
-Ansible projects follow a specific directory structure.
-Warning: There's a lot of directories and main.yml files!
-(This can be customized in ansible.cfg, but best to use standard layout)
-
+Ansible projects follow a specific directory structure, as illustrated below:
 
 .
 ├── ansible.cfg           # Config: inventory paths, plugin dirs, etc
@@ -239,11 +250,11 @@ TROUBLESHOOTING 🫨
 
 2. Failed to connect to the host via ssh
     - Ensure you have run `make initial-apply` before running `make apply`
-    - Check SSH access to the server. Ensure you can SSH in manually.
     - Check the ansible_user and ansible_host variables in your inventory file
+    - Check SSH access to the server. Ensure you can SSH in manually.
 
 3. The task includes an option with an undefined variable.. '___' is undefined
-    - Fix: Define that variable in `./inventories/group_vars/all.yml` or elsewhere
+    - Define that variable in `./inventories/group_vars/all.yml` or elsewhere
 
 4. Unable to encrypt nor hash, passlib must be installed
     - Install passlin, with: `pip install passlib`
