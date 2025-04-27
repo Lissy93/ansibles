@@ -1,48 +1,114 @@
-.PHONY: first-apply apply docker users ssh timezone hostname firewall dotfiles monit 
+.PHONY: help first-apply apply setup requirements lint install-ansible install-lint check-env $(ROLE_TARGETS) $(ROLE_CATEGORIES)
 
-ANSIBLE_CMD = ansible-playbook playbooks/all.yml
-BECOME = --ask-become-pass
-AS_ROOT = --extra-vars "ansible_user=root ansible_port=22"
+#––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+# Variables
+PYTHON		  		:= python3
+PIP			 				:= pip3
+ANSIBLE_PLAYBOOK:= ansible-playbook
+ANSIBLE_LINT		:= ansible-lint
+GALAXY		  		:= ansible-galaxy
+PLAYBOOK				:= playbooks/all.yml
+BECOME		  		:= --ask-become-pass
+AS_ROOT		 			:= --extra-vars "ansible_user=root ansible_port=22"
 
-# Before server is setup, login as root, create user, setup SSH
-first-apply:
-	$(ANSIBLE_CMD) $(AS_ROOT) --tags initial
+# List of all "role" tags
+ROLE_TARGETS = docker \
+	timezone \
+	users \
+	ssh \
+	hostname \
+	firewall \
+	fail2ban \
+	dotfiles \
+	monit \
+	cockpit \
+	borg \
+	maldet \
+	lynis
 
-# Then after setup, just make apply
-apply:
-	$(ANSIBLE_CMD) $(BECOME)
+ROLE_CATEGORIES = essentials \
+	configs \
+	backups \
+	access \
+	services \
+	security \
+	monitoring
 
-# Or, to run just one specific role
-docker:
-	$(ANSIBLE_CMD) $(BECOME) --tags docker
-timezone:
-	$(ANSIBLE_CMD) $(BECOME) --tags timezone
-users:
-	$(ANSIBLE_CMD) $(BECOME) --tags users
-ssh:
-	$(ANSIBLE_CMD) $(BECOME) --tags ssh
-timezone:
-	$(ANSIBLE_CMD) $(BECOME) --tags timezone
-hostname:
-	$(ANSIBLE_CMD) $(BECOME) --tags hostname
-firewall:
-	$(ANSIBLE_CMD) $(BECOME) --tags firewall
-fail2ban:
-	$(ANSIBLE_CMD) $(BECOME) --tags fail2ban
-dotfiles:
-	$(ANSIBLE_CMD) $(BECOME) --tags dotfiles
-monit:
-	$(ANSIBLE_CMD) $(BECOME) --tags monit
-cockpit:
-	$(ANSIBLE_CMD) $(BECOME) --tags cockpit
-borg:
-	$(ANSIBLE_CMD) $(BECOME) --tags borg
-maldet:
-	$(ANSIBLE_CMD) $(BECOME) --tags maldet
-lynis:
-	$(ANSIBLE_CMD) $(BECOME) --tags lynis
+#––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+help:
+		@echo "Usage:"
+		@echo	"  make setup         # install pip deps, galaxy requirements, ansible-lint"
+		@echo "  make requirements  # install ansible-galaxy roles from requirements.yml"
+		@echo "  make lint          # run ansible-lint on your playbooks"
+		@echo "  make first-apply   # Initial bootstrap (root-only, before any users exist)"
+		@echo "  make apply         # run all roles"
+		@echo "  make <role>        # run one tagged role"
+		@echo "  make <category>    # run one tagged category"
+		@echo
+	@echo "Available categories: $(ROLE_CATEGORIES)"
+	@echo "Available roles: $(ROLE_TARGETS)"
 
+#––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+# Environment checks
+check-env:
+	@command -v $(PYTHON) >/dev/null 2>&1 || { \
+	  echo >&2 "Error: $(PYTHON) not found. Please install Python 3."; \
+	  exit 1; \
+	}
+	@command -v $(PIP) >/dev/null 2>&1 || { \
+	  echo >&2 "Error: $(PIP) not found. Please install pip for Python 3."; \
+	  exit 1; \
+	}
 
-# Run a specific role
-role %:
-	ansible-playbook playbooks/run-role.yml -e "role_to_run=$*" $(BECOME)
+check-ansible:
+	@command -v $(ANSIBLE_LINT) >/dev/null 2>&1 || { \
+	  echo >&2 "Error: $(ANSIBLE_LINT) not found. Run `make install-lint`"; \
+	  exit 1; \
+	}
+	@command -v $(ANSIBLE_PLAYBOOK) >/dev/null 2>&1 || { \
+	  echo >&2 "Error: $(ANSIBLE_PLAYBOOK) not found. Run `make install-ansible`"; \
+	  exit 1; \
+	}
+
+#––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+# pip-based installs
+install-ansible: check-env
+	@echo "Installing Ansible via pip..."
+	$(PIP) install --user ansible
+
+install-lint: check-env
+	@echo "Installing ansible-lint via pip..."
+	$(PIP) install --user ansible-lint
+
+#––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+# Galaxy roles
+requirements: check-env check-ansible
+	@echo "Installing Ansible Galaxy roles from requirements.yml..."
+	$(GALAXY) install -r requirements.yml
+
+#––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+# Combined setup
+setup: check-env install-ansible install-lint requirements
+	@echo "✔️  Environment is ready - Ansible, ansible-lint, and Galaxy roles installed."
+
+#––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+# Linting
+lint: check-ansible
+	@echo "Running ansible-lint..."
+	$(ANSIBLE_LINT) playbooks/
+
+#––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+# Existing targets
+
+first-apply first-run:
+	$(ANSIBLE_PLAYBOOK) $(PLAYBOOK) $(AS_ROOT) --tags initial
+
+apply run:
+	$(ANSIBLE_PLAYBOOK) $(PLAYBOOK) $(BECOME)
+
+# pattern rule: `make docker` → ansible-playbook ... --tags docker
+$(ROLE_TARGETS):
+	$(ANSIBLE_PLAYBOOK) $(PLAYBOOK) $(BECOME) --tags $@
+
+$(ROLE_CATEGORIES):
+	$(ANSIBLE_PLAYBOOK) $(PLAYBOOK) $(BECOME) --tags $@

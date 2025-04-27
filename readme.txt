@@ -2,7 +2,7 @@
 INTRO 👋
 --------
 This is how I setup and maintain my servers, with Ansible.
-Everything is nice and easy, automated, repeatable and safe.
+It makes everything is nice 'n easy, automated, repeatable and safe.
 
 ================================================================================
 
@@ -12,8 +12,8 @@ The following tasks (roles) are performed on each server,
 to take it from zero to full-configured, usable and secure.
 Only the basics are required, the rest are optional.
 
-➡️ ESSENTIAL TASKS:
- ⚒️ Basics:
+➡️ RECOMMENDED TASKS:
+ ⚒️ Essentials:
   ├── ✅ Apt - Configures repositories and updates packages
   ├── ✅ Packages - Installs essential packages
   ├── ✅ User accounts - Creates user(s) and sets permissions
@@ -179,42 +179,43 @@ Ansible projects follow a specific directory structure.
 Warning: There's a lot of directories and main.yml files!
 (This can be customized in ansible.cfg, but best to use standard layout)
 
-ansible/                             # ── Top-level project directory
-├── ansible.cfg                      # ── Paths to inventories, roles, vars, etc.
-├── requirements.yml                 # ── List of external Galaxy roles
-├── .vault_pass.txt                  # ── (Optional) vault password
-├── inventories/                     # ── Define which hosts to manage
-│   ├── production.yml               # ── 
-│   ├── staging.yml                  # ── 
-│   ├── group_vars/                  # ── Variables applied to whole groups
-│   │   ├── all.yml                  #     ── Vars for every host in any inventory
-│   │   └── webservers.yml           #     ── Vars for the “webservers” group only
-│   └── host_vars/                   # ── Variables applied to individual hosts
-│       └── db01.example.com.yml     #     ── Overrides for a single host
-├── playbooks/                       # ── Entry-point playbooks invoking roles/tasks
-│   ├── site.yml                     # ── “Umbrella” playbook: runs everything in correct order
-│   ├── webservers.yml               # ── Web-tier specific playbook
-│   └── dbservers.yml                # ── Database playbook
-├── roles/                           # ── Reusable components (can be shared via Galaxy)
-│   ├── common/                      # ── “Bootstrap” tasks for all hosts
-│   │   ├── tasks/                   #     ── Main list of steps to run
-│   │   │   └── main.yml             #       ── Entry point for this role’s tasks
-│   │   ├── handlers/                #     ── Handlers triggered by tasks (e.g. restart service)
-│   │   │   └── main.yml
-│   │   ├── defaults/                #     ── Lowest-priority default variables
-│   │   │   └── main.yml
-│   │   ├── vars/                    #     ── Higher-priority role variables
-│   │   │   └── main.yml
-│   │   ├── files/                   #     ── Static files to copy (e.g. configs, binaries)
-│   │   ├── templates/               #     ── Jinja2 templates (e.g. nginx.conf.j2)
-│   │   └── meta/                    #     ── Role metadata and dependencies
-│   │       └── main.yml
-│   ├── webserver/                   # ── Role to install & configure your web server
-│   │   └── (same sub-dirs as above)
-│   └── database/                    # ── Role for DB setup (Postgres/MySQL/etc.)
-│       └── (…)
-└── scripts/                         # ── Helper scripts (e.g. inventory generators)
-    └── dynamic_inventory.py         #
+
+.
+├── ansible.cfg           # Config: inventory paths, plugin dirs, etc
+├── callback_plugins/     # Custom Ansible callback plugins
+│   └── pretty.py         # Emoji & color stdout formatting
+├── inventories/          # Host/group definitions and vars
+│   ├── remote.yml        # Remote production inventory
+│   └── group_vars/       # Variables applied by group
+│       └── all.yml       # Vars for all hosts
+├── Makefile              # Shortcut targets for playbook runs
+├── playbooks/            # Playbooks invoking roles by concern
+│   ├── all.yml           # Main “run everything” playbook
+│   ├── access.yml        # VPN & Cockpit setup
+│   ├── backups.yml       # Borg backup tasks
+│   ├── configs.yml       # General configuration tasks
+│   ├── essentials.yml    # Core hardening, compliance, audits
+│   ├── monitoring.yml    # Loki, Prometheus & Grafana setup
+│   ├── security.yml      # Fail2ban, OSSEC, Maldet, Lynis, AppArmor
+│   └── services.yml      # Docker, Caddy proxy, and other services
+├── readme.txt            # Project overview & usage instructions
+├── requirements.yml      # Galaxy roles/collections to install
+└── roles/                # Reusable Ansible roles (one dir per role)
+    ├── borg/             # Automated Borg backups
+    ├── cockpit/          # Cockpit management UI
+    ├── common/           # Common bootstrap tasks
+    ├── directories/      # Directory structure setup
+    ├── docker/           # Docker engine install & config
+    ├── dotfiles/         # User dotfiles deployment
+    ├── fail2ban/         # Intrusion-detection rules
+    ├── firewall/         # UFW firewall configuration
+    ├── hostname/         # Hostname & /etc/hosts management
+    ├── lynis/            # Automated Lynis security audits
+    ├── maldet/           # Linux Malware Detect integration
+    ├── monit/            # Service monitoring with Monit
+    ├── ssh/              # SSH hardening & key management
+    ├── timezone/         # Timezone & NTP configuration
+    └── users/            # User account & permission management
 
 Native Ansible Commands:
 - Run a playbook on specific servers:
