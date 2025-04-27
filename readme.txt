@@ -14,18 +14,18 @@ Only the basics are required, the rest are optional.
 
 ➡️ ESSENTIAL TASKS:
  ⚒️ Basics:
-  ├── ☑️ Apt - Configures repositories and updates packages
-  ├── ☑️ Packages - Installs essential packages
-  ├── ☑️ User accounts - Creates user(s) and sets permissions
-  ├── ☑️ SSH - Configures and hardens SSH access
-  ├── ☑️ Timezone - Sets timezone and NTP server
-  ├── ☑️ Hostname - Sets hostname and configures hosts
-  ├── ☑️ Firewall - Sets UFW rules
-  ├── ☑️ Mail - Sets up Postfix (for notification sending)
-  └── ☑️ Updates - Enables unattended upgrades
+  ├── ✅ Apt - Configures repositories and updates packages
+  ├── ✅ Packages - Installs essential packages
+  ├── ✅ User accounts - Creates user(s) and sets permissions
+  ├── ✅ SSH - Configures and hardens SSH access
+  ├── ✅ Timezone - Sets timezone and NTP server
+  ├── ✅ Hostname - Sets hostname and configures hosts
+  ├── ✅ Firewall - Sets UFW rules
+  ├── ✅ Mail - Sets up Postfix (for notification sending)
+  └── ✅ Updates - Enables unattended upgrades
 
 ➡️ OPTIONAL TASKS:
- ⚙️ Extras:
+ ⚙️ Configs:
   ├── ☑️ Packages - Installs extra packages, for easier management
   └── ☑️ Dotfiles - Configures settings for CLI utils and apps
 
@@ -87,9 +87,29 @@ STEP 2: CONFIGURATION
 
 STEP 4: RUNNING
 - Use the commands in the Makefile to execute the playbooks.
-  - First run: `make first-apply`
-  - Subsequent runs: `make apply`
-  
+  - First run: `make first-run`
+  - Subsequent runs: `make run`
+
+================================================================================
+
+COMMANDS 💲
+-----------
+Basics:
+- `make` - View all available commands and our man page
+- `make run` - Run all playbooks (as normal user with new SSH settings)
+- `make <role>` - Run a specific role (e.g. `make ssh`)
+- `make <category>` - Run all roles in a category (e.g. `make security`)
+
+Setup:
+- `make first-run` - First run on a fresh server (as root)
+- `make install-ansible` - Install Ansible and dependencies
+- `make requirements` - Downloads external roles from Ansible Galaxy
+
+Other:
+- `make lint` - Run Ansible-lint on all playbooks and roles
+- `make test` - Run Ansible-lint and yamllint on all playbooks and roles
+- `make docs` - Generates documentation for roles and playbooks
+
 ================================================================================
 
 ADDING SERVERS 🖥️
@@ -123,23 +143,23 @@ ADDING VARIABLES 🗂️
 
 WHAT'S ANSIBLE, AND WHY USE IT? ❓
 ----------------------------------
-Ansible is a simple (just YAML), open source (free) and agentless (nothing to install)
-tool for automating pretty much anything, anywhere.
-Just describe how you want your system to look, and Ansible will ensure the state is met.
+Ansible is a simple, open source, agentless tool for automating anything.
+Just describe how you want your system to look, and Ansible will ensure
+the state is met.
 
 10 Reasons why I love Ansible
 Unlike Bash scripts or other alternatives...
 1. Ansible is idempotent, so you can run it as many times as you like,
    and it will only make changes if the system is not in the desired state.
-2. Ansible is agentless, meaning there's nothing to install on any of your systems.
-3. Ansible is declarative, so you don't have to worry about the order of operations.
-4. Ansible is reusable and x-platform. Write your playbooks once, and run them anywhere.
-5. Ansible is scalable. You can run it on a single host or thousands of servers at once.
+2. Ansible is agentless, there's nothing to install on any of your systems.
+3. Ansible is declarative, you don't have to worry about the order of operations.
+4. Ansible is reusable and x-platform. Write playbooks once, run them anywhere.
+5. Ansible is scalable. Run it on a single host or thousands of servers at once.
 6. Ansible is extensible. There's thousands of playbooks on Galaxy,
    or you can write your own modules in any language you want.
 7. Ansible is simple. No finicky scripts, just self-documenting YAML declarations.
-8. Ansible is powerful. You can do anything from simple tasks to complex orchestration.
-9. Ansible is safe. Use --diff to see what changes will be made, and --check for a dry-run.
+8. Ansible is powerful. Doing anything from simple tasks to complex orchestration.
+9. Ansible is safe. Preview changes to be made (--diff), or do a dry-run (--check)
 10. Ansible is configurable. Use built-in or custom 'facts' to customize playbooks.
 
 Read the Ansible docs at:
@@ -160,12 +180,12 @@ Warning: There's a lot of directories and main.yml files!
 (This can be customized in ansible.cfg, but best to use standard layout)
 
 ansible/                             # ── Top-level project directory
-├── ansible.cfg                      # ── Config: inventory paths, roles path, default vars, plugins, etc.
-├── requirements.yml                 # ── List of external Galaxy/Ansible-lint roles to install
-├── .vault_pass.txt                  # ── (Optional) file containing your vault password; keep out of Git
+├── ansible.cfg                      # ── Paths to inventories, roles, vars, etc.
+├── requirements.yml                 # ── List of external Galaxy roles
+├── .vault_pass.txt                  # ── (Optional) vault password
 ├── inventories/                     # ── Define which hosts to manage
-│   ├── production.yml               # ── Production inventory (hostnames/IPs, groups)
-│   ├── staging.yml                  # ── Staging/testing inventory
+│   ├── production.yml               # ── 
+│   ├── staging.yml                  # ── 
 │   ├── group_vars/                  # ── Variables applied to whole groups
 │   │   ├── all.yml                  #     ── Vars for every host in any inventory
 │   │   └── webservers.yml           #     ── Vars for the “webservers” group only
@@ -196,7 +216,7 @@ ansible/                             # ── Top-level project directory
 └── scripts/                         # ── Helper scripts (e.g. inventory generators)
     └── dynamic_inventory.py         #
 
-Commands:
+Native Ansible Commands:
 - Run a playbook on specific servers:
   > ansible-playbook -i inventories/<hosts>.yml playbooks/<playbook>.yml
 - Run only roles with a specific tag:
@@ -214,7 +234,7 @@ TROUBLESHOOTING 🫨
 ------------------
 1. Ansible requires the locale encoding to be UTF-8; Detected None.
     - Fix: set `export LC_ALL=`
-    - Or run `locale -a` to see available locales, and set one, like `LC_ALL='C.utf8`
+    - Or run `locale -a` to see your locales, then set one, like `LC_ALL='C.utf8`
 
 2. Failed to connect to the host via ssh
     - Ensure you have run `make initial-apply` before running `make apply`
@@ -229,7 +249,7 @@ TROUBLESHOOTING 🫨
 
 5. YAML syntax or Jinja2 template errors
     - Check your YAML syntax with: `yamllint <file>.yml`
-    - Check your Jinja2 templates with: `ansible-playbook --syntax-check <playbook>.yml`
+    - Check your Jinja2 with: `ansible-playbook --syntax-check <playbook>.yml`
 
 6. The role 'foo' was not found
     - Install external roles with: `ansible-galaxy install -r requirements.yml`
@@ -249,6 +269,9 @@ and they will be better tailored to your specific needs.
 (Also I don't much want to be responsible if something goes wrong! 🫣)
 
 But feel free to use or copy-paste which ever parts you like into your setup 🫶
+
+IMPORTANT: Read through the playbooks and roles before running them.
+And make sure you understand what they do, to avoid any surprises!
 
 ================================================================================
 
