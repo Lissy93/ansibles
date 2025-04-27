@@ -102,9 +102,26 @@ class CallbackModule(DefaultCb):
     def v2_runner_on_failed(self, result, ignore_errors=False):
         host = result._host.get_name()
         task = result.task_name or result.task.get_name()
-        e, c  = self.STATUS_EMOJI["failed"]
-        self._display.display(f"[{host}] {e} {task} ", color=None, newline=False)
-        self._display.display(f"(Failed)", color=c)
+        emoji, color = self.STATUS_EMOJI["failed"]
+
+        self._display.display(f"[{host}] {emoji} {task} ", color=None, newline=False)
+        self._display.display("(Failed)", color=color)
+
+        msg = result._result.get("msg")
+        if msg:
+            indent = " " * (len(host) + 3)
+            for line in str(msg).splitlines():
+                self._display.display(f"{indent}{line}", color="dark gray")
+
+        stderr = result._result.get("stderr")
+        if stderr:
+            indent = " " * (len(host) + 3)
+            self._display.display(f"{indent}stderr: {stderr}", color="dark gray")
+        stdout = result._result.get("stdout")
+        if stdout:
+            indent = " " * (len(host) + 3)
+            self._display.display(f"{indent}stdout: {stdout}", color="dark gray")
+
 
     def v2_runner_on_skipped(self, result):
         host = result._host.get_name()
@@ -116,9 +133,13 @@ class CallbackModule(DefaultCb):
     def v2_runner_on_unreachable(self, result):
         host = result._host.get_name()
         task = result.task_name or result.task.get_name()
-        e, c  = self.STATUS_EMOJI["unreachable"]
-        self._display.display(f"[{host}] {e} {task} ", color=None, newline=False)
-        self._display.display(f"(Unreachable)", color=c)
+        emoji, color = self.STATUS_EMOJI["unreachable"]
+        self._display.display(f"[{host}] {emoji} {task} ", color=None, newline=False)
+        self._display.display("(Unreachable)", color=color)
+        msg = result._result.get("msg")
+        if msg:
+            indent = " " * (len(host) + 3)
+            self._display.display(f"{indent}{msg}", color="dark gray")
 
     # —— Loop‐item callbacks —— #
     def _print_item_details(self, result, host):
