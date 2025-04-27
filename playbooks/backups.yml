@@ -1,0 +1,8 @@
+# Enables scheduled backups of specific directories on the server
+- name: 'Backups'
+  hosts: all
+  become: true
+  tags: backups
+  roles:
+    - role: borg
+      tags: [ borg ]

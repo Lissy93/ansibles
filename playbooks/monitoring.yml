@@ -1,0 +1,8 @@
+# Configures detailed logging, metrics and monitoring for all processes 
+- name: 'Monitoring'
+  hosts: all
+  become: true
+  tags: monitoring
+  roles:
+    - role: monit
+      tags: [ monit, monitoring ]

@@ -1,0 +1,61 @@
+# Basic server setup, to always be run on everything
+# Sets up dep repos, users, ssh, time, host, firewall, mail, etc
+
+# - name: Essentials
+#   hosts: all
+#   become: true
+#   tags: essentials
+#   roles:
+#     - role: common           # apt, packages, updates…
+#     - role: users            # user accounts
+#     - role: directories      # server structure
+#     - role: ssh              # SSH hardening
+#     - role: timezone         # timezone & NTP
+#     - role: hostname         # hostname, /etc/hosts
+#     - role: firewall         # UFW
+#     # - role: mail             # postfix
+
+
+- name: 'Essentials: General system configuration'
+  hosts: all
+  become: true
+  tags: essentials
+  roles:
+    - common
+    - users
+    - directories
+    - timezone
+    - hostname
+    - firewall
+    # - mail
+
+- name: 'Essentials: SSH config - pre-lockdown'
+  hosts: all
+  become: true
+  roles:
+    - role: ssh
+      vars:
+        ssh_lockdown: false
+
+- name: 'Essentials: Verify SSH access for user'
+  hosts: all
+  remote_user: "{{ new_user }}"
+  gather_facts: false
+  tasks:
+    - name: Attempt to login as {{ new_user }}
+      ping:
+      register: ping_result
+      failed_when: ping_result.ping != 'pong'
+    - name: Mark this host as ready for lockdown
+      set_fact:
+        user_ready: true
+
+- name: 'Essentials: SSH config - Prevent root login'
+  hosts: all
+  become: true
+  roles:
+    - role: ssh
+      vars:
+        ssh_lockdown: true
+      when: user_ready | default(false)
+  tags: essentials

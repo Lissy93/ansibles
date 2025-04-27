@@ -1,5 +1,5 @@
 ---
-- name: Bootstrap a new server
+- name: Getting started....!
   hosts: all
   become: true
   vars:
@@ -26,41 +26,16 @@
           SSH root login will not be disabled until this is fixed.
       when: user_password is not defined
 
-  roles:
-    - role: common
-    - role: hostname
-      tags: [ hostname, initial ]
-    - role: directories
-      tags: [ directories, initial ]
-    - role: users
-      tags: [ users, initial, essential ]
-    - role: ssh
-      tags: [ ssh, initial, security, essential ]
-    - role: timezone
-      tags: [ timezone, initial ]
-    - role: firewall
-      tags: [ firewall, initial, security, essential ]
-    - role: fail2ban
-      tags: [ fail2ban, security ]
-    - role: geerlingguy.docker
-      tags: [ docker ]
-    - role: dotfiles
-      tags: [ dotfiles ]
-    - role: monit
-      tags: [ monit ]
-    - role: cockpit
-      tags: [ cockpit ]
-    - role: borg
-      tags: [ borg, backups ]
-    - role: maldet
-      tags: [ maldet, security ]
-    - role: lynis
-      tags: [ lynis, security ]
-
+- import_playbook: essentials.yml
+- import_playbook: configs.yml
+- import_playbook: backups.yml
+- import_playbook: access.yml
+- import_playbook: services.yml
+- import_playbook: security.yml
 
 - name: Check if user can connect with Ansible
   hosts: all
-  gather_facts: false
+  gather_facts: true
   become: false
   remote_user: "{{ new_user }}"
   tasks:

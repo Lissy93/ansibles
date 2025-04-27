@@ -1,0 +1,9 @@
+# Optionally configures frequently used services.
+# Such as Docker on conferer-based systems, or Caddy on server-based systems.
+- name: 'Services'
+  hosts: all
+  become: true
+  tags: services
+  roles:
+    - role: geerlingguy.docker
+      tags: [ docker, services ]

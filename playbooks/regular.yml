@@ -1,3 +1,0 @@
-- name: General server maintenance, to be run frequently on cron
-  hosts: all
-  become: true

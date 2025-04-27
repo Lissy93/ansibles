@@ -1,0 +1,5 @@
+# Installs extra packages, and configures dotfiles
+- name: 'Configs'
+  hosts: all
+  become: true
+  tags: configs

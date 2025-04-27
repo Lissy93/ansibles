@@ -1,0 +1,9 @@
+# Configures easy access to the VPN/server, via Wireguard and Cockpit
+
+
+- name: 'Access'
+  hosts: all
+  become: true
+  tags: access
+  roles:
+    - cockpit
