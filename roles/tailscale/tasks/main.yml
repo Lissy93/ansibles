@@ -1,0 +1,57 @@
+- name: "💭 Skip Tailscale: no auth key provided"
+  debug:
+    msg: >
+      "Skipping Tailscale role: 'tailscale_auth_key' is not defined.
+       Set it to a valid Tailscale auth key to enable."
+  when: (tailscale_auth_key | default('')) == ''
+
+- name: "📥 Add Tailscale GPG key"
+  ansible.builtin.apt_key:
+      state: present
+      url: >-
+        https://pkgs.tailscale.com/stable/{{ 'ubuntu' if ansible_distribution|lower 
+        == 'ubuntu' else 'debian' }}/{{ ansible_distribution_release }}.noarmor.gpg
+  when: ansible_facts.os_family == 'Debian'
+
+- name: "📦 Add Tailscale APT repository"
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb https://pkgs.tailscale.com/stable/{{ 'ubuntu' if ansible_distribution|lower 
+      == 'ubuntu' else 'debian' }} {{ ansible_distribution_release }} main
+    state: present
+    filename: tailscale.list
+  when: ansible_facts.os_family == 'Debian'
+
+- name: "🔄 Update apt cache"
+  ansible.builtin.apt:
+    update_cache: yes
+  when: ansible_facts.os_family == 'Debian'
+
+- name: "📥 Install Tailscale"
+  ansible.builtin.apt:
+    name: tailscale
+    state: present
+
+- name: "🔧 Enable and start the tailscaled service"
+  ansible.builtin.systemd:
+    name: tailscaled
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+- name: "🚀 Join Tailnet with tailscale up"
+  ansible.builtin.command: >
+    tailscale up
+    --authkey={{ tailscale_auth_key }}
+    --hostname={{ tailscale_hostname }}
+    {%- if tailscale_advertise_routes | length > 0 -%}
+    --advertise-routes={{ tailscale_advertise_routes | join(',') }}
+    {%- endif -%}
+    {%- if tailscale_advertise_exit_node | bool -%}
+    --advertise-exit-node
+    {%- endif -%}
+    {%- if tailscale_tags | length > 0 -%}
+    --tags={{ tailscale_tags | join(',') }}
+    {%- endif -%}
+  register: tailscale_up
+  changed_when: tailscale_up.rc == 0 and "'already up to date'" not in tailscale_up.stdout

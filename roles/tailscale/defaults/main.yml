@@ -1,0 +1,26 @@
+
+
+# Which control plane to use: "tailscale" (managed) or "headscale" (self-hosted)
+tailscale_backend: "tailscale"
+
+# Required to use tailscale.
+# Override this in your inventory/group_vars with a valid auth key.
+# Get it at: https://login.tailscale.com/admin/settings/keys
+tailscale_auth_key: ''
+
+# The host (IP or valid hostname which is resolvable)
+# Uses current inventory host by default
+tailscale_hostname: "{{ inventory_hostname }}"
+
+# How to advertise local subnets into your Tailnet (e.g. ["10.0.0.0/24"]):
+tailscale_advertise_routes: []
+
+# If true, this node becomes an "exit node" for internet-bound traffic
+tailscale_advertise_exit_node: false
+
+# VLAN-style tags for ACLs (e.g. ["tag:linux","tag:web"]):
+tailscale_tags: []
+
+# Headscale settings (only needed if tailscale_backend = "headscale")
+headscale_server_url: null        # e.g. "https://headscale.example.com"
+headscale_auth_key: null          # preauth key you generated in Headscale
