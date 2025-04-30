@@ -6,7 +6,7 @@
 #   become: true
 #   tags: essentials
 #   roles:
-#     - role: common           # apt, packages, updates…
+#     - role: installs         # apt, packages, updates…
 #     - role: users            # user accounts
 #     - role: directories      # server structure
 #     - role: ssh              # SSH hardening
@@ -21,7 +21,7 @@
   become: true
   tags: essentials
   roles:
-    - common
+    - installs
     - users
     - directories
     - timezone

@@ -1,9 +1,13 @@
-# Configures easy access to the VPN/server, via Wireguard and Cockpit
-
+# Configures easy access to the server via Cockpit (web UI) and Tailscale (VPN)
 
 - name: 'Access'
   hosts: all
   become: true
   tags: access
   roles:
-    - cockpit
+    - role: tailscale
+      tags: [ tailscale, access ]
+      when: tailscale_auth_key|default('')|length > 0
+    - role: cockpit
+      tags: [ cockpit, access ]
+    
