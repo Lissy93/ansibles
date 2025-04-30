@@ -16,5 +16,7 @@
       tags: [ maldet, security ]
     - role: lynis
       tags: [ lynis, security ]
+    - role: apparmor
+      tags: [ apparmor, security ]
       vars:
           run_scan: false
