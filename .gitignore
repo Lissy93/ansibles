@@ -5,6 +5,7 @@
 *.orig
 *.swp
 *.tmp
+.ansible
 
 # Ignore sensitive or dynamic inventory files
 inventory/*.ini
@@ -46,7 +47,3 @@ Thumbs.db
 .idea/
 .vscode/
 *.code-workspace
-
-# Ignore Ansible Galaxy downloads (optional)
-roles/galaxy/
-collections/ansible_collections/

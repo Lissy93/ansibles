@@ -10,7 +10,6 @@ extends_documentation_fragment:
 
 from ansible.plugins.callback.default import CallbackModule as DefaultCb
 from ansible.utils.color import colorize, hostcolor
-import json
 
 class CallbackModule(DefaultCb):
     CALLBACK_VERSION = 2.0
@@ -51,14 +50,15 @@ class CallbackModule(DefaultCb):
         if role_obj:
             role_name = role_obj.get_name() or role_obj._role_name
             if role_name != self._current_role:
-                header = f"Starting role: {role_name}"
-                line    = '─' * len(header)
+                header = f"⏳ {role_name} role"
+                line    = '─' * (len(header) + 2)
                 self._display.display("", screen_only=True)
                 self._display.display(header, color='cyan', screen_only=True)
                 self._display.display(line,   color='cyan', screen_only=True)
                 self._current_role = role_name
 
     def v2_playbook_on_play_start(self, play):
+        self._play = play
         title = play.get_name().strip() or play._file_name or 'Mystery Playbook'
         self._display.display("", screen_only=True)
         self._display.display(title, color='magenta')

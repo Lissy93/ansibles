@@ -1,16 +1,13 @@
 
-INTRO 👋
---------
-This is how I setup and maintain all my servers (VPSs, VMs, boxes, etc).
-So they're all configured correctly, secured, backed up, monitored and usable.
+OBJECTIVE 🎯
+-----------
+After creating a fresh new VM/VPS/server (and adding a SSH key while doing so)
+I should just be able to run one command on my PC, to have the new remote system
+perfectly setup just how I like it.
 
 Thanks to Ansible, everything is nice 'n easy, automated, repeatable and safe 😊
-
-The readme contains:
-- List of all playbooks and roles, and what they each do
-- Pointers for getting started with Ansible, what it is, and why use it
-- Setup and usage guide for this repo, and catalog of available commands
-- Some helpful info, that you should deffo read before continuing!
+So all my fresh machines can be correctly configured, secured, backed up, and
+actually usable and ready to go!
 
 ================================================================================
 
@@ -246,7 +243,7 @@ TROUBLESHOOTING 🫨
 ------------------
 1. Ansible requires the locale encoding to be UTF-8; Detected None.
     - Fix: set `export LC_ALL=`
-    - Or run `locale -a` to see your locales, then set one, like `LC_ALL='C.utf8`
+    - Or run `locale -a` to see your locales and set with `LC_ALL='en_US.UTF-8'`
 
 2. Failed to connect to the host via ssh
     - Ensure you have run `make initial-apply` before running `make apply`
