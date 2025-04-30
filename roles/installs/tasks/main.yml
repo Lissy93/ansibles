@@ -1,0 +1,56 @@
+---
+- name: "Ensure APT cache is up-to-date"
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: "Upgrade all packages to latest"
+  ansible.builtin.apt:
+    upgrade: dist
+    autoremove: yes
+    autoclean: yes
+
+- block:
+    - name: "Install core packages"
+      ansible.builtin.apt:
+        name: "{{ core }}"
+        state: present
+        update_cache: no
+      when: core is defined and core | length > 0
+  rescue:
+    - name: "⚠️ Core packages failed, continuing"
+      ansible.builtin.debug:
+        msg: "Installation of core packages ({{ core }}) failed."
+
+- block:
+    - name: "Install networking tools"
+      ansible.builtin.apt:
+        name: "{{ networking }}"
+        state: present
+      when: networking is defined and networking | length > 0
+  rescue:
+    - name: "⚠️ Networking tools failed, continuing"
+      ansible.builtin.debug:
+        msg: "Installation of networking packages ({{ networking }}) failed."
+
+- block:
+    - name: "Install monitoring utilities"
+      ansible.builtin.apt:
+        name: "{{ monitoring }}"
+        state: present
+      when: monitoring is defined and monitoring | length > 0
+  rescue:
+    - name: "⚠️ Monitoring utilities failed, continuing"
+      ansible.builtin.debug:
+        msg: "Installation of monitoring packages ({{ monitoring }}) failed."
+
+- block:
+    - name: "Install miscellaneous packages"
+      ansible.builtin.apt:
+        name: "{{ misc }}"
+        state: present
+      when: misc is defined and misc | length > 0
+  rescue:
+    - name: "⚠️ Misc tools failed, continuing"
+      ansible.builtin.debug:
+        msg: "Installation of misc packages ({{ misc }}) failed."

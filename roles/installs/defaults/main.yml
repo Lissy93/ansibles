@@ -1,0 +1,48 @@
+
+
+core:
+  - build-essential
+  - curl
+  - file
+  - git
+  - less
+  - man-db
+  - unzip
+  - vim
+  - zip
+
+shell:
+  - fd-find
+  - fzf
+  - jq
+  - neovim
+  - ripgrep
+  - tmux
+  - zoxide
+  - zsh
+
+networking:
+  - dnsutils
+  - iperf3
+  - iputils-ping
+  - mtr-tiny
+  - net-tools
+  - nmap
+  - traceroute
+  - whois
+
+monitoring:
+  - bpytop      # Resource monitoring
+  - duff        # Disk usage
+  - gping       # Ping charts
+  - iftop       # Bandwidth utilization check
+  - iotop       # Disk I/O per-process
+  - iperf3      # Precise cross-server speed testing
+  - mtr         # Traceoute, ping, network diagnostics
+  - ncdu        # Disk usage analyzer 
+  - atop        # Process viewer
+
+misc:
+  - figlet
+  - lolcat
+  - neofetch
