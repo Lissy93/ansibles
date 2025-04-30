@@ -1,0 +1,5 @@
+- name: reload apparmor
+  ansible.builtin.service:
+    name: "{{ apparmor_service }}"
+    state: reloaded
+    enabled: yes

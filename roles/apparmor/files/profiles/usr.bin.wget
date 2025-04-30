@@ -1,0 +1,16 @@
+#include <tunables/global>
+
+/usr/bin/wget {
+  # include base abstractions
+  #include <abstractions/base>
+
+  # network
+  network inet stream,
+  network inet dgram,
+
+  # TLS certs
+  /etc/ssl/certs/** r,
+
+  # the binary
+  /usr/bin/wget mr,
+}

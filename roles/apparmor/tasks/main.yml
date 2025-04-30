@@ -1,0 +1,62 @@
+---
+# roles/apparmor/tasks/main.yml
+
+- block:
+
+    # 1) Install & start the service
+    - name: "📦 Install AppArmor"
+      apt:
+        name: "{{ apparmor_package }}"
+        state: present
+        update_cache: yes
+
+    - name: "🔧 Ensure AppArmor is running"
+      service:
+        name: "{{ apparmor_service }}"
+        state: started
+        enabled: yes
+
+    # 2) If no profiles, just skip to the end of the block
+    - name: "ℹ️ No AppArmor profiles defined, done"
+      debug:
+        msg: "No profiles to deploy."
+      when: apparmor_profiles | default([]) | length == 0
+
+    # 3) Prep the directory
+    - name: "📁 Ensure /etc/apparmor.d exists"
+      file:
+        path: /etc/apparmor.d
+        state: directory
+        mode: "0755"
+
+    # 4) Deploy each profile
+    - name: "📄 Deploy AppArmor profile {{ item.name }}"
+      copy:
+        src: "{{ item.src }}"
+        dest: "/etc/apparmor.d/{{ item.name }}"
+        mode: "0644"
+      loop: "{{ apparmor_profiles }}"
+      when:
+        - (item.state | default('present')) == 'present'
+        - item.src is defined
+      notify: reload apparmor
+
+    # 5) Remove absent ones
+    - name: "🗑️ Remove AppArmor profile {{ item.name }}"
+      file:
+        path: "/etc/apparmor.d/{{ item.name }}"
+        state: absent
+      loop: "{{ apparmor_profiles }}"
+      when: (item.state | default('present')) == 'absent'
+      notify: reload apparmor
+
+    # 6) Warn about misconfigured entries
+    - name: "⚠️ Skipping malformed profile entry"
+      debug:
+        msg: "Profile '{{ item.name }}' has no src, skipping."
+      loop: "{{ apparmor_profiles }}"
+      when:
+        - (item.state | default('present')) == 'present'
+        - item.src is not defined
+
+  when: apparmor_enabled | default(true) | bool

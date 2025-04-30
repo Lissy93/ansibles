@@ -1,0 +1,37 @@
+# Globally enable or disable this role
+apparmor_enabled: true
+
+# Package & service names (Ubuntu / Debian defaults)
+apparmor_package: apparmor
+apparmor_service: apparmor
+
+# List of AppArmor profiles to deploy.
+# Each item must be a dict with:
+#   name:   <filename under /etc/apparmor.d/>
+#   src:    <path to local file in your playbook/files or role/files>
+#   state:  present|absent   (optional, defaults to present)
+#
+# Example:
+# apparmor_profiles:
+#   - name:  usr.sbin.mysqld
+#     src:   profiles/usr.sbin.mysqld
+#     state: present
+# apparmor_profiles: []
+
+apparmor_profiles:
+  - name: usr.sbin.sshd
+    src: profiles/usr.sbin.sshd
+  - name: usr.bin.ping
+    src: profiles/usr.bin.ping
+  - name: usr.sbin.cron
+    src: profiles/usr.sbin.cron
+  - name: usr.sbin.rsyslogd
+    src: profiles/usr.sbin.rsyslogd
+  - name: usr.bin.curl
+    src: profiles/usr.bin.curl
+  - name: usr.bin.wget
+    src: profiles/usr.bin.wget  
+  - name: usr.bin.apt-get
+    src: profiles/usr.bin.apt-get
+  - name: usr.bin.dpkg
+    src: profiles/usr.bin.dpkg

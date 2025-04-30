@@ -1,0 +1,14 @@
+#include <tunables/global>
+
+# “ping” utility needs CAP_NET_RAW
+usr.bin.ping {
+  # minimal file access
+  /bin/ping ix,
+
+  # allow raw sockets
+  capability net_raw,
+
+  # allow read of DNS configs (for name lookups)
+  /etc/resolv.conf r,
+  /etc/hosts r,
+}

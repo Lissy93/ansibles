@@ -1,0 +1,22 @@
+#include <tunables/global>
+
+/usr/sbin/rsyslogd {
+  # basic system paths
+  #include <abstractions/base>
+  # logging needs DNS sometimes
+  #include <abstractions/nameservice>
+
+  # UDP/TCP sockets
+  network inet dgram,
+  network inet stream,
+
+  # config
+  /etc/rsyslog.conf r,
+  /etc/rsyslog.d/*.conf r,
+
+  # write log files
+  /var/log/** rw,
+
+  # the daemon binary
+  /usr/sbin/rsyslogd mr,
+}
