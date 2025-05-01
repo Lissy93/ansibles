@@ -1,0 +1,46 @@
+- name: "Initializing: Running pre-checks"
+  hosts: all
+  gather_facts: true
+  become: true
+  remote_user: "{{ new_user }}"
+  pre_tasks:
+    - name: "System summary"
+      ansible.builtin.debug:
+        msg: |
+          ℹ️ Check system info
+             OS:    {{ ansible_facts.lsb.description 
+                       | default(ansible_facts.distribution ~ " " ~ ansible_facts.distribution_version) }}
+             Host:  {{ ansible_facts.fqdn | default(ansible_facts.hostname) }}
+             Arch:  {{ (ansible_facts.architecture ~ ' ' ~ ansible_facts.system) | default('n/a', true) }}
+             Uptime: {{ ((ansible_facts.uptime_seconds|default(0)|int) / 3600) | round(1) }}h
+             IP:    {{ ansible_facts.default_ipv4.address | default("n/a") }}
+             Time:  {{ ansible_date_time.iso8601 | default(ansible_date_time.date ~ " " ~ ansible_date_time.time, true) }}
+             CPU:   {{ ansible_facts.processor_count | default("n/a") }} cores
+             Mem:   {{ ansible_facts.memfree_mb | default("n/a") }}MB used out of {{ ansible_facts.memtotal_mb | default("n/a") }}MB
+             Virt:  {{ ansible_facts.virtualization_type | default("none") }}
+             Gate:  {{ ansible_facts.default_ipv4.gateway | default("n/a") }}
+             Interfaces:  {{ ansible_facts.interfaces | default([]) | join(', ') }}
+      when: ansible_facts is defined
+
+    - name: Ensure Python is available
+      raw: test -e /usr/bin/python3 || (apt update && apt install -y python3)
+      changed_when: false
+
+    - name: Warn if user_password is not set
+      ansible.builtin.debug:
+        msg: |
+          ⚠️ WARNING: 'user_password' is not defined!
+          User {{ new_user }} will not be able to use sudo without a password.
+          SSH root login will not be disabled until this is fixed.
+      when: user_password is not defined
+
+    - name: "Ensure essential variables are defined"
+      assert:
+        that:
+          - user_password is defined
+          - new_user is defined
+          - user_ssh_key_path is defined
+        fail_msg: |
+          You must define user_password, new_user and user_ssh_key_path variables
+          Put them in: inventories/remote/host_vars/{{ansible_hostname}}.yml
+          or (if shared) in: inventories/remote/group_vars/all.yml

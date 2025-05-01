@@ -8,6 +8,8 @@
 .ansible
 
 # Ignore sensitive or dynamic inventory files
+inventories/*
+
 inventory/*.ini
 inventory/*.yml
 inventory/*.yaml

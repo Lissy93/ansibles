@@ -1,44 +1,26 @@
----
-- name: Getting started....!
-  hosts: all
-  become: true
-  vars:
-    hostname: "{{ inventory_hostname }}"
-    user_name: alicia
-    new_user: alicia
-    user_ssh_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
-    srv_owner: alicia
-    srv_group: alicia
-    password: "{{ user_password | password_hash('sha512') }}"
-    docker_users:
-      - alicia
+# This is the main entrypoint playbook, which:
+# Conditionally calls all other playbooks for a full setup of of specified hosts
 
-  pre_tasks:
-    - name: Ensure Python is available
-      raw: test -e /usr/bin/python3 || (apt update && apt install -y python3)
-      changed_when: false
+# Checks connection to host(s), dependencies are met, and required variables are set
+- import_playbook: pre-checks.yml
 
-    - name: Warn if user_password is not set
-      ansible.builtin.debug:
-        msg: |
-          ⚠️ WARNING: 'user_password' is not defined!
-          User {{ new_user }} will not be able to use sudo without a password.
-          SSH root login will not be disabled until this is fixed.
-      when: user_password is not defined
-
+# Sets up SSH, users, directories, timezone, hostname, firewall, etc
 - import_playbook: essentials.yml
+
+# Configures the shell and dotfiles
 - import_playbook: configs.yml
+
+# Sets up secheduled backups
 - import_playbook: backups.yml
+
+# Installs and configures Cockpit and VPN for easy server access
 - import_playbook: access.yml
+
+# Sets up common services, like Docker
 - import_playbook: services.yml
+
+# Configures security, including apparmor, maldet, Fail2Ban, Lynis
 - import_playbook: security.yml
 
-- name: Check if user can connect with Ansible
-  hosts: all
-  gather_facts: true
-  become: false
-  remote_user: "{{ new_user }}"
-  tasks:
-    - name: Confirm login is working and set user_ready flag
-      set_fact:
-        user_ready: true
+# All done, runs some final checks and prints output
+- import_playbook: post-checks.yml
