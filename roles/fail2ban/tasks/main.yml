@@ -1,8 +1,8 @@
 # fail2ban/tasks/main.yml
 
-- name: "⚡ Fail2Ban Setup - Skipping because disabled"
+- name: "Cancel if Fail2Ban is not enabled"
   debug:
-    msg: "⚡ Skipping Fail2Ban setup because 'fail2ban_enabled' is false."
+    msg: "⚠️ Skipping Fail2Ban setup because 'fail2ban_enabled' is false."
   when: not fail2ban_enabled
   tags: [fail2ban]
 

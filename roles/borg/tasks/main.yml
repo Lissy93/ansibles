@@ -20,7 +20,7 @@
         comment: "{{ borgbase_key_name }}"
         force: false
 
-    - name: 📢 Prompt user to back up private SSH key
+    - name: Prompt user to back up private SSH key
       debug:
         msg: |
           📢 Don't forget to back up your Borg SSH private key:

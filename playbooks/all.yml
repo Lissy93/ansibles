@@ -1,5 +1,5 @@
-# This is the main entrypoint playbook, which:
-# Conditionally calls all other playbooks for a full setup of of specified hosts
+# This is the main entrypoint playbook, which calls all other playbooks
+# for a full setup of the selected host(s).
 
 # Checks connection to host(s), dependencies are met, and required variables are set
 - import_playbook: pre-checks.yml

@@ -1,4 +1,4 @@
-- name: Allow fallback SSH port 22 (only during setup)
+- name: Allow fallback SSH port 22 if in setup mode
   ufw:
     rule: allow
     port: "22"
@@ -30,6 +30,6 @@
     state: enabled
     policy: deny
 
-- name: Lock down firewall (remove old SSH port)
+- name: Lock down firewall and remove old SSH port
   include_tasks: lockdown.yml
   when: firewall_lockdown | default(false)

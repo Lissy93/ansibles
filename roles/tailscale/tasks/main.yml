@@ -1,11 +1,11 @@
-- name: "💭 Skip Tailscale: no auth key provided"
+- name: "Check if auth key provided"
   debug:
     msg: >
       "Skipping Tailscale role: 'tailscale_auth_key' is not defined.
        Set it to a valid Tailscale auth key to enable."
   when: (tailscale_auth_key | default('')) == ''
 
-- name: "📥 Add Tailscale GPG key"
+- name: "Add Tailscale GPG key"
   ansible.builtin.apt_key:
       state: present
       url: >-
@@ -13,7 +13,7 @@
         == 'ubuntu' else 'debian' }}/{{ ansible_distribution_release }}.noarmor.gpg
   when: ansible_facts.os_family == 'Debian'
 
-- name: "📦 Add Tailscale APT repository"
+- name: "Add Tailscale APT repository"
   ansible.builtin.apt_repository:
     repo: >-
       deb https://pkgs.tailscale.com/stable/{{ 'ubuntu' if ansible_distribution|lower 
@@ -22,24 +22,24 @@
     filename: tailscale.list
   when: ansible_facts.os_family == 'Debian'
 
-- name: "🔄 Update apt cache"
+- name: "Update apt cache"
   ansible.builtin.apt:
     update_cache: yes
   when: ansible_facts.os_family == 'Debian'
 
-- name: "📥 Install Tailscale"
+- name: "Install Tailscale"
   ansible.builtin.apt:
     name: tailscale
     state: present
 
-- name: "🔧 Enable and start the tailscaled service"
+- name: "Enable and start the tailscaled service"
   ansible.builtin.systemd:
     name: tailscaled
     enabled: yes
     state: started
     daemon_reload: yes
 
-- name: "🚀 Join Tailnet with tailscale up"
+- name: "Join Tailnet with tailscale up"
   ansible.builtin.command: >
     tailscale up
     --authkey={{ tailscale_auth_key }}

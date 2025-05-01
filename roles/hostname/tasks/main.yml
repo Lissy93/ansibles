@@ -32,7 +32,7 @@
     - hostname_set | bool
     - update_hosts_file | bool
 
-- name: Restart hostname service if needed (optional)
+- name: Restart hostname service if needed
   ansible.builtin.service:
     name: systemd-hostnamed
     state: restarted

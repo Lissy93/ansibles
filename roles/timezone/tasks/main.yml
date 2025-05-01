@@ -85,7 +85,7 @@
     - ntp_enabled | bool
     - ntp_mode == 'chrony'
 
-- name: Immediate sync using ntpdate (optional fallback)
+- name: Immediate sync using ntpdate as fallback
   ansible.builtin.command: ntpdate pool.ntp.org
   when:
     - sync_time_now | bool
