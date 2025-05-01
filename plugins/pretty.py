@@ -50,7 +50,7 @@ class CallbackModule(DefaultCb):
         if role_obj:
             role_name = role_obj.get_name() or role_obj._role_name
             if role_name != self._current_role:
-                header = f"⏳ {role_name} role"
+                header = f"▶️ {role_name} role"
                 line    = '─' * (len(header) + 2)
                 self._display.display("", screen_only=True)
                 self._display.display(header, color='cyan', screen_only=True)

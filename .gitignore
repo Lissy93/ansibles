@@ -9,12 +9,16 @@
 
 # Ignore sensitive or dynamic inventory files
 inventories/*
-
 inventory/*.ini
 inventory/*.yml
 inventory/*.yaml
 inventory/*.json
 !inventory/sample_inventory.yml
+
+# Logs
+logs/*
+*.log
+*.log.*
 
 # Vault files (plaintext or auto-generated, if not encrypted)
 vault.yml

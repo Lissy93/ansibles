@@ -9,6 +9,8 @@ Thanks to Ansible, everything is nice 'n easy, automated, repeatable and safe �
 So all my fresh machines can be correctly configured, secured, backed up, and
 actually usable and ready to go!
 
+I've documented the playbooks, usage guide and some info about Ansible below...
+
 ================================================================================
 
 JOBS 👔
@@ -57,15 +59,11 @@ Only the "Essentials" are required, the rest are optional.
   ├── ☑️ Log storage – Loki for ingesting and aggregating all logs
   ├── ☑️ Log shipping – Grafana Agent, pushes logs and metrics to Loki
   ├── ☑️ Metrics collection – Grafana Agent, pushing metrics into Prometheus
+  ├── ☑️ Metrics storage – Prometheus for storing and querying metrics
   ├── ☑️ Visualization – Grafana for dashboards from Loki and Prometheus
   ├── ☑️ Alerting – Alertmanager for triggering critical notifications
-  └── ☑️ Log rotation - Sets up logrotate for all logs, so they don't get big
-
-Running:
-- `make essentials` will only apply the basics (essential for all servers)
-- `make apply` will run everything
-- `make first-apply` should be used for the first run (logs in as root)
-- `make [category]` or `make [role]` will run a specific category or role
+  ├── ☑️ Log rotation - Sets up logrotate for all logs, so they don't get big
+  └── ☑️ Monit - Monitors services and restarts them if they fail
 
 Note about Docker:
 On servers where Docker is used for deploying services, some of the apps above
@@ -102,16 +100,16 @@ Basics:
 - `make` - View all available commands and our man page
 - `make run` - Run all playbooks (as normal user with new SSH settings)
 - `make <role>` - Run a specific role (e.g. `make ssh`)
-- `make <category>` - Run all roles in a category (e.g. `make security`)
+- `make <playbook>` - Run a specific playbook (e.g. `make security`)
 
 Setup:
-- `make first-run` - First run on a fresh server (as root)
-- `make install-ansible` - Install Ansible and dependencies
+- `make install-ansible` - Install Ansible (on host)
 - `make requirements` - Downloads external roles from Ansible Galaxy
+- `make scaffold-hosts` - Creates inventory template (for you to fill in)
+- `make first-run` - First run on a fresh server (as root)
 
 Other:
 - `make lint` - Run Ansible-lint on all playbooks and roles
-- `make test` - Run Ansible-lint and yamllint on all playbooks and roles
 - `make docs` - Generates documentation for roles and playbooks
 
 ================================================================================
@@ -119,8 +117,9 @@ Other:
 ADDING SERVERS 🖥️
 -----------------
 Define your list of hosts (servers to manage) in the inventory file(s).
-Specify the path to this file in the ansible config: ./ansible.cfg
-By default, we've got ./inventories/remote.yml, which looks like this:
+The path which ansible looks for hosts in, is specified in ./ansible.cfg
+If it's your first time, you can run `make scaffold-hosts` to create a template
+Then complete the values in .inventories/remote/hosts.yml, which looks like this:
 
 all:
   hosts:
