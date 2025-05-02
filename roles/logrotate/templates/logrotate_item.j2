@@ -1,0 +1,19 @@
+{{ item.path }} {
+{% if item.options is defined %}
+{%   for opt in item.options %}
+    {{ opt }}
+{%   endfor %}
+{% endif %}
+{% if item.frequency is defined %}
+    {{ item.frequency }}
+{% endif %}
+{% if item.rotate is defined %}
+    rotate {{ item.rotate }}
+{% endif %}
+{% if item.maxage is defined %}
+    maxage {{ item.maxage }}
+{% endif %}
+{% if item.create | default(false) %}
+    create {{ item.create_mode }} {{ item.create_owner }} {{ item.create_group }}
+{% endif %}
+}

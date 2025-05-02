@@ -1,0 +1,30 @@
+logrotate_enabled: true         # Set to false to disable logrotate configuration
+logrotate_config_dir: "/etc/logrotate.d"  # Directory to place logrotate configs
+
+# List of logrotate item definitions
+# Each item defines a block in /etc/logrotate.d/{{ item.name }}
+# Fields:
+#   name: unique filename under logrotate_config_dir
+#   path: files or patterns to rotate
+#   options: list of logrotate options (missingok, compress, etc.)
+#   rotate: number of rotations to keep
+#   frequency: daily, weekly, monthly, etc.
+#   create: whether to include a create directive
+#   create_mode, create_owner, create_group: values for create
+logrotate_items:
+  - name: system
+    path: "/var/log/*.log"
+    # path: "/var/log/custom/*.log"
+    options:
+      - missingok
+      - compress
+      - delaycompress
+      - notifempty
+    rotate: 28
+    frequency: daily
+    maxage: 90
+    missingok: true
+    create: true
+    create_mode: "0644"
+    create_owner: "root"
+    create_group: "root"
