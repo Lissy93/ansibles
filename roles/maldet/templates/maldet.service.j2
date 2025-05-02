@@ -1,0 +1,13 @@
+[Unit]
+Description=Linux Malware Detect monitoring - maldet
+After=network.target
+
+[Service]
+Type=forking
+WorkingDirectory={{ maldet_install_path }}
+ExecStart={{ maldet_install_path }}/maldet --monitor {{ maldet_install_path }}
+PIDFile={{ maldet_install_path }}/tmp/inotifywait.pid
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

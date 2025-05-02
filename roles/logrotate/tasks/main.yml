@@ -1,35 +1,36 @@
 ---
-# Logrotate role: installs logrotate and deploys configs
-
-- name: Ensure logrotate package is installed
+- name: Install logrotate package
   apt:
     name: logrotate
     state: present
     update_cache: yes
-  when: logrotate_enabled
-  ignore_errors: true
-  changed_when: false
+  when: logrotate_enabled | bool
 
-- name: Ensure logrotate config directory exists
+- name: Ensure config directory exists
   file:
     path: "{{ logrotate_config_dir }}"
     state: directory
     owner: root
     group: root
     mode: "0755"
-  when: logrotate_enabled
-  ignore_errors: true
+  when: logrotate_enabled | bool
 
-- name: Skip if no logrotate items defined
+- name: Skip if no custom logrotate items defined
   debug:
-    msg: "No logrotate_items defined, nothing to do"
+    msg: "No logrotate_items defined; nothing to deploy"
   when:
-    - logrotate_enabled
-    - logrotate_items is not defined or logrotate_items | length == 0
+    - logrotate_enabled | bool
+    - logrotate_items | default([]) | length == 0
 
-- name: Deploy logrotate configuration files
+- name: Remove default 'system' snippet to avoid duplicate entries
+  file:
+    path: "{{ logrotate_config_dir }}/system"
+    state: absent
+  when: logrotate_enabled | bool
+
+- name: Deploy logrotate config for each item
   template:
-    src: logrotate_item.j2
+    src: item.j2
     dest: "{{ logrotate_config_dir }}/{{ item.name }}"
     owner: root
     group: root
@@ -38,7 +39,12 @@
   loop_control:
     label: "{{ item.name }}"
   when:
-    - logrotate_enabled
-    - logrotate_items is defined
+    - logrotate_enabled | bool
     - logrotate_items | length > 0
-  ignore_errors: true
+
+- name: Enable and start logrotate timer
+  systemd:
+    name: logrotate.timer
+    enabled: yes
+    state: started
+  when: logrotate_enabled | bool

@@ -9,6 +9,7 @@
     name:
       - wget
       - tar
+      - inotify-tools
     state: present
   when: maldet_enabled
   tags: [maldet]
@@ -20,7 +21,6 @@
     mode: '0644'
   when: maldet_enabled
   tags: [maldet]
-
 
 - name: Extract Maldet
   ansible.builtin.unarchive:
@@ -48,7 +48,7 @@
   tags: [maldet]
 
 
-- name: Configure Maldet (optional)
+- name: Configure Maldet
   ansible.builtin.lineinfile:
     path: /usr/local/maldetect/conf.maldet
     regexp: "^{{ item.key }}="
@@ -58,6 +58,19 @@
     - { key: "email_alert", value: "{{ '1' if maldet_email_alert else '0' }}" }
     - { key: "email_addr",  value: "{{ maldet_email_address }}" }
     - { key: "quar_hits",   value: "{{ '1' if maldet_quarantine_hits else '0' }}" }
+  when: maldet_enabled
+  tags: [maldet]
+
+- name: Deploy maldet systemd unit
+  template:
+    src: maldet.service.j2
+    dest: /etc/systemd/system/maldet.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - Reload systemd
+    - Restart maldet
   when: maldet_enabled
   tags: [maldet]
 

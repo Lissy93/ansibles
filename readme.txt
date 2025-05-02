@@ -15,10 +15,6 @@ I've documented the playbooks, usage guide and some info about Ansible below...
 
 JOBS 👔
 -------
-The following tasks (roles) are performed on each server,
-to take it from zero to full-configured, usable and secure.
-Only the "Essentials" are required, the rest are optional.
-
 ➡️ RECOMMENDED TASKS:
  ⚒️ Essentials:
   ├── ✅ Apt - Configures repositories and updates packages

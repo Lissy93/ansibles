@@ -1,6 +1,6 @@
 maldet_enabled: true
 
-maldet_install_path: /opt/maldetect
+maldet_install_path: /usr/local/maldetect
 maldet_scan_paths:
   - /home
   - /var/www

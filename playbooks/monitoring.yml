@@ -6,3 +6,16 @@
   roles:
     - role: monit
       tags: [ monit, monitoring ]
+      ignore_errors: true
+      
+    - role: logrotate
+      tags: [ logrotate, monitoring ]
+      ignore_errors: true
+
+    - role: loki
+      tags: [ loki, monitoring ]
+      ignore_errors: true
+
+    - role: grafana-agent
+      tags: [ grafana-agent, monitoring ]
+      ignore_errors: true

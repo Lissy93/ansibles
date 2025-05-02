@@ -10,6 +10,9 @@
 # Configures the shell and dotfiles
 - import_playbook: configs.yml
 
+# Set up observability and monitoring
+- import_playbook: monitoring.yml
+
 # Sets up secheduled backups
 - import_playbook: backups.yml
 

@@ -1,30 +1,18 @@
-logrotate_enabled: true         # Set to false to disable logrotate configuration
-logrotate_config_dir: "/etc/logrotate.d"  # Directory to place logrotate configs
+---
+# Enable or disable this entire role
+logrotate_enabled: true
 
-# List of logrotate item definitions
-# Each item defines a block in /etc/logrotate.d/{{ item.name }}
-# Fields:
-#   name: unique filename under logrotate_config_dir
-#   path: files or patterns to rotate
-#   options: list of logrotate options (missingok, compress, etc.)
-#   rotate: number of rotations to keep
-#   frequency: daily, weekly, monthly, etc.
-#   create: whether to include a create directive
-#   create_mode, create_owner, create_group: values for create
-logrotate_items:
-  - name: system
-    path: "/var/log/*.log"
-    # path: "/var/log/custom/*.log"
-    options:
-      - missingok
-      - compress
-      - delaycompress
-      - notifempty
-    rotate: 28
-    frequency: daily
-    maxage: 90
-    missingok: true
-    create: true
-    create_mode: "0644"
-    create_owner: "root"
-    create_group: "root"
+# Where to place individual logrotate config snippets
+logrotate_config_dir: "/etc/logrotate.d"
+
+# List of things to rotate. Each item must include:
+#   name:      unique filename under logrotate_config_dir (e.g. "myapp")
+#   path:      a file path or shell glob (e.g. "/var/log/myapp/*.log")
+#   options:   list of logrotate options (e.g. ["missingok", "compress"])
+#   rotate:    how many rotations to keep (integer)
+#   frequency: "daily", "weekly", etc.
+#   create:    whether to include a `create` directive (boolean)
+#   create_mode/owner/group: values for create, if enabled
+#
+# By default, we do nothing. Override in your playbook or group_vars.
+logrotate_items: []
