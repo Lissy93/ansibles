@@ -1,0 +1,16 @@
+
+agent_enabled: true
+agent_version: "v0.44.2"
+grafana_agent_url: "https://github.com/grafana/agent/releases/download/{{ agent_version }}/grafana-agent-linux-amd64.zip"
+grafana_agent_config_path: "/etc/grafana-agent"
+grafana_agent_binary_path: "/usr/local/bin/grafana-agent"
+grafana_agent_data_path: "/var/lib/grafana-agent"
+grafana_agent_config_file: "{{ grafana_agent_config_path }}/config.yml"
+
+loki_push_url: "http://localhost:3100/loki/api/v1/push"
+prometheus_remote_write_url: "http://localhost:9090/api/v1/write"
+
+log_paths:
+  - /var/log/syslog
+  - /var/log/auth.log
+  - /var/log/kern.log
