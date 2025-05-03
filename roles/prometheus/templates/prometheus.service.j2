@@ -1,0 +1,17 @@
+[Unit]
+Description=Prometheus Time Series Database
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{ prometheus_user }}
+Group={{ prometheus_group }}
+Type=simple
+ExecStart=/usr/local/bin/prometheus \
+  --config.file={{ prometheus_config_dir }}/prometheus.yml \
+  --storage.tsdb.path={{ prometheus_data_dir }} \
+  --web.listen-address={{ prometheus_listen_address }}:{{ prometheus_port }}
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

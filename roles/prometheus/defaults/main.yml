@@ -1,0 +1,34 @@
+---
+# whether to run this role
+prometheus_enabled: true
+
+# which version of Prometheus to install
+prometheus_version: "2.46.0"
+
+# download URL for the official Prometheus release tarball
+prometheus_download_url: https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz
+
+# where to install Prometheus
+prometheus_install_dir: "/opt/prometheus-{{ prometheus_version }}"
+
+# where to put config & rules
+prometheus_config_dir: "/etc/prometheus"
+
+# where Prometheus will store its TSDB
+prometheus_data_dir: "/var/lib/prometheus"
+
+# system user/group for the Prometheus process
+prometheus_user: prometheus
+prometheus_group: prometheus
+
+# minimal scrape interval
+prometheus_global_scrape_interval: "15s"
+
+# scrape jobs (you can override/add more)
+prometheus_scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9091"]
+
+prometheus_listen_address: "0.0.0.0"
+prometheus_port: 9091

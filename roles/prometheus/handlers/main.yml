@@ -1,0 +1,23 @@
+---
+- name: Link Prometheus binaries
+  ansible.builtin.file:
+    src: "{{ prometheus_install_dir }}/prometheus"
+    dest: /usr/local/bin/prometheus
+    state: link
+  become: true
+
+- name: Link promtool binary
+  ansible.builtin.file:
+    src: "{{ prometheus_install_dir }}/promtool"
+    dest: /usr/local/bin/promtool
+    state: link
+  become: true
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: Restart Prometheus
+  ansible.builtin.systemd:
+    name: prometheus
+    state: restarted

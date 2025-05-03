@@ -19,3 +19,7 @@
     - role: grafana-agent
       tags: [ grafana-agent, monitoring ]
       ignore_errors: true
+
+    - role: prometheus
+      tags: [ prometheus, monitoring ]
+      ignore_errors: true

@@ -1,0 +1,5 @@
+global:
+  scrape_interval: "{{ prometheus_global_scrape_interval }}"
+
+scrape_configs:
+{{ prometheus_scrape_configs | to_nice_yaml(indent=2) }}
