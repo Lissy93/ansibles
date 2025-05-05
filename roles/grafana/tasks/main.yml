@@ -41,7 +41,6 @@
     state: present
     update_cache: yes
 
-
 - name: Install Grafana package
   ansible.builtin.apt:
     name:    "{{ grafana_package }}"
@@ -57,6 +56,15 @@
     mode:  '0644'
   notify: Restart Grafana
   when: grafana_ini | length > 0
+
+- name: "Provision Prometheus & Loki in Grafana"
+  ansible.builtin.copy:
+    src: provisioning/datasources/
+    dest: /etc/grafana/provisioning/datasources/
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart Grafana
 
 - name: Enable and start Grafana service
   ansible.builtin.systemd:

@@ -20,6 +20,18 @@
       tags: [ grafana-agent, monitoring ]
       ignore_errors: true
 
+    - role: blackbox_exporter
+      tags: [ blackbox_exporter, monitoring ]
+      ignore_errors: true
+
+    - role: node_exporter
+      tags: [ node_exporter, monitoring ]
+      ignore_errors: true
+
     - role: prometheus
       tags: [ prometheus, monitoring ]
+      ignore_errors: true
+
+    - role: grafana
+      tags: [ grafana, monitoring ]
       ignore_errors: true

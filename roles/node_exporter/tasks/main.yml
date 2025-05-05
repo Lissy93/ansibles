@@ -1,0 +1,55 @@
+---
+- name: "skip node_exporter if disabled"
+  meta: end_host
+  when: not (node_exporter_enabled | bool)
+
+- name: ensure prometheus user exists
+  ansible.builtin.user:
+    name: "{{ node_exporter_user }}"
+    system: true
+    shell: /usr/sbin/nologin
+
+- name: fetch node_exporter
+  ansible.builtin.get_url:
+    url: "{{ node_exporter_url }}"
+    dest: "/tmp/node_exporter-{{ node_exporter_version }}.tar.gz"
+    mode: 0644
+
+- name: unpack node_exporter
+  ansible.builtin.unarchive:
+    src: "/tmp/node_exporter-{{ node_exporter_version }}.tar.gz"
+    dest: "{{ node_exporter_install_dir }}"
+    remote_src: yes
+    extra_opts: [ "--strip-components=1" ]
+
+- name: install node_exporter binary
+  ansible.builtin.file:
+    src: "{{ node_exporter_install_dir }}/node_exporter"
+    dest: /usr/local/bin/node_exporter
+    state: link
+
+- name: create systemd unit for node_exporter
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/node_exporter.service
+    content: |
+      [Unit]
+      Description=Prometheus Node Exporter
+      After=network.target
+
+      [Service]
+      User={{ node_exporter_user }}
+      Group={{ node_exporter_group }}
+      ExecStart=/usr/local/bin/node_exporter --web.listen-address=:{{ node_exporter_port }}
+      Restart=on-failure
+
+      [Install]
+      WantedBy=multi-user.target
+  notify: reload systemd
+
+- name: ensure node_exporter is running
+  ansible.builtin.systemd:
+    name: node_exporter
+    enabled: true
+    state: started
+
+# handler to reload systemd
