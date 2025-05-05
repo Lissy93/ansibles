@@ -107,6 +107,19 @@ Setup:
 Other:
 - `make lint` - Run Ansible-lint on all playbooks and roles
 - `make docs` - Generates documentation for roles and playbooks
+- `make test` - Runs all tests on playbooks and hosts
+
+Native Ansible Commands:
+- Run a playbook on specific servers:
+  > ansible-playbook -i inventories/<hosts>.yml playbooks/<playbook>.yml
+- Run only roles with a specific tag:
+  > ansible-playbook -i inventories/<hosts>.yml playbooks/<play>.yml --tags <tag>
+- Run a playbook on a specific server:
+  > ansible-playbook -i inventories/<hosts>.yml playbooks/<play>.yml -l <servers>
+- Do a dry-run, and preview what changes will be made before applying:
+  > ansible-playbook -i inventories/<hosts>.yml playbooks/<play>.yml --check --diff
+- Run an ad-hoc command on servers in an inventory:
+  > ansible db -i inventories/<hosts>.yml -m shell -a "<shell command>"
 
 ================================================================================
 
@@ -182,18 +195,27 @@ Terminology:
 
 Structure:
 Ansible projects follow a specific directory structure, as illustrated below:
+The top-level directories are:
+- inventories/ - Where you list the hosts/servers that changes will be applied to
+- playbooks/ - The playbooks that run the roles, and define the order of execution
+- roles/ - The individual roles, made up of tasks, handlers, and other files
+
+This is the structure of my project:
 
 .
 ├── ansible.cfg           # Config: inventory paths, plugin dirs, etc
 ├── callback_plugins/     # Custom Ansible callback plugins
 │   └── pretty.py         # Emoji & color stdout formatting
 ├── inventories/          # Host/group definitions and vars
-│   ├── remote.yml        # Remote production inventory
-│   └── group_vars/       # Variables applied by group
-│       └── all.yml       # Vars for all hosts
+│   └── remote/           # Remote production inventory
+│       ├── hosts.yml     # Inventory host list
+│       ├── group_vars/   # Variables applied by group
+│       │   └── all.yml   # Variables to be shared by all servers in this group
+│       └── host_vars/    # Per-host variables
+│           └── serv1.yml # Example: Add a file for each of your servers
 ├── Makefile              # Shortcut targets for playbook runs
 ├── playbooks/            # Playbooks invoking roles by concern
-│   ├── all.yml           # Main “run everything” playbook
+│   ├── all.yml           # Main "run everything" playbook
 │   ├── access.yml        # VPN & Cockpit setup
 │   ├── backups.yml       # Borg backup tasks
 │   ├── configs.yml       # General configuration tasks
@@ -204,33 +226,32 @@ Ansible projects follow a specific directory structure, as illustrated below:
 ├── readme.txt            # Project overview & usage instructions
 ├── requirements.yml      # Galaxy roles/collections to install
 └── roles/                # Reusable Ansible roles (one dir per role)
-    ├── borg/             # Automated Borg backups
-    ├── cockpit/          # Cockpit management UI
-    ├── common/           # Common bootstrap tasks
-    ├── directories/      # Directory structure setup
-    ├── docker/           # Docker engine install & config
-    ├── dotfiles/         # User dotfiles deployment
-    ├── fail2ban/         # Intrusion-detection rules
-    ├── firewall/         # UFW firewall configuration
-    ├── hostname/         # Hostname & /etc/hosts management
-    ├── lynis/            # Automated Lynis security audits
-    ├── maldet/           # Linux Malware Detect integration
-    ├── monit/            # Service monitoring with Monit
-    ├── ssh/              # SSH hardening & key management
-    ├── timezone/         # Timezone & NTP configuration
-    └── users/            # User account & permission management
-
-Native Ansible Commands:
-- Run a playbook on specific servers:
-  > ansible-playbook -i inventories/<hosts>.yml playbooks/<playbook>.yml
-- Run only roles with a specific tag:
-  > ansible-playbook -i inventories/<hosts>.yml playbooks/<play>.yml --tags <tag>
-- Run a playbook on a specific server:
-  > ansible-playbook -i inventories/<hosts>.yml playbooks/<play>.yml -l <servers>
-- Do a dry-run, and preview what changes will be made before applying:
-  > ansible-playbook -i inventories/<hosts>.yml playbooks/<play>.yml --check --diff
-- Run an ad-hoc command on servers in an inventory:
-  > ansible db -i inventories/<hosts>.yml -m shell -a "<shell command>"
+    ├── apparmor          # AppArmor profile deployment
+    ├── blackbox_exporter # Prometheus Blackbox Exporter
+    ├── borg              # Automated Borg backups
+    ├── cockpit           # Cockpit management UI
+    ├── directories       # Directory structure setup
+    ├── docker            # Docker engine install & config
+    ├── dotfiles          # User dotfiles deployment
+    ├── fail2ban          # Intrusion-detection rules
+    ├── firewall          # UFW firewall configuration
+    ├── geerlingguy.docker# Docker setup, from geerlingguy
+    ├── geerlingguy.pip   # Pip/Python setup, from geerlingguy
+    ├── grafana           # Grafana install, config & provisioning
+    ├── grafana-agent     # Grafana Agent setup & metrics checks
+    ├── hostname          # Hostname & /etc/hosts management
+    ├── installs          # Miscellaneous package installs
+    ├── logrotate         # Logrotate config and templates
+    ├── loki              # Loki log-aggregation setup
+    ├── lynis             # Automated Lynis security audits
+    ├── maldet            # Linux Malware Detect integration
+    ├── monit             # Service monitoring with Monit
+    ├── node_exporter     # Prometheus Node Exporter
+    ├── prometheus        # Prometheus server setup & config
+    ├── ssh               # SSH hardening & key management
+    ├── tailscale         # Tailscale VPN installation
+    ├── timezone          # Timezone & NTP configuration
+    └── users             # User account & permission management
 
 ================================================================================
 

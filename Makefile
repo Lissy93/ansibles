@@ -1,4 +1,4 @@
-.PHONY: help first-apply apply setup requirements lint install-ansible install-lint check-env $(ROLE_TARGETS) $(ROLE_CATEGORIES)
+.PHONY: help first-apply apply setup requirements lint install-ansible install-lint check-env $(ROLE_TAGS) $(PLAYBOOKS)
 
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 # Variables
@@ -12,7 +12,7 @@ BECOME		  		:= --ask-become-pass
 AS_ROOT		 			:= --extra-vars "ansible_user=root ansible_port=22"
 
 # List of all "role" tags
-ROLE_TARGETS = docker \
+ROLE_TAGS = docker \
 	timezone \
 	users \
 	ssh \
@@ -26,13 +26,8 @@ ROLE_TARGETS = docker \
 	maldet \
 	lynis
 
-ROLE_CATEGORIES = essentials \
-	configs \
-	backups \
-	access \
-	services \
-	security \
-	monitoring
+# List all available playbooks (from playbooks directory)
+PLAYBOOKS = $(shell find playbooks -name '*.yml' -type f | sed 's|playbooks/||;s|\.yml||')
 
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 help:
@@ -43,10 +38,10 @@ help:
 		@echo "  make first-apply   # Initial bootstrap (root-only, before any users exist)"
 		@echo "  make apply         # run all roles"
 		@echo "  make <role>        # run one tagged role"
-		@echo "  make <category>    # run one tagged category"
+		@echo "  make <playbook>    # run one tagged category"
 		@echo
-	@echo "Available categories: $(ROLE_CATEGORIES)"
-	@echo "Available roles: $(ROLE_TARGETS)"
+	@echo "Available playbooks: $(PLAYBOOKS)"
+	@echo "Available roles: $(ROLE_TAGS)"
 
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 # Environment checks
@@ -107,8 +102,10 @@ apply run:
 	$(ANSIBLE_PLAYBOOK) $(PLAYBOOK) $(BECOME)
 
 # pattern rule: `make docker` → ansible-playbook ... --tags docker
-$(ROLE_TARGETS):
+$(ROLE_TAGS):
 	$(ANSIBLE_PLAYBOOK) $(PLAYBOOK) $(BECOME) --tags $@
 
-$(ROLE_CATEGORIES):
-	$(ANSIBLE_PLAYBOOK) $(PLAYBOOK) $(BECOME) --tags $@
+# This runs a specific playbook.
+# E.g. `make monitoring` → ansible-playbook ./playbooks/monitoring.yml
+$(PLAYBOOKS):
+	$(ANSIBLE_PLAYBOOK) ./playbooks/$(@).yml $(BECOME)
