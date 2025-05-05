@@ -41,6 +41,7 @@ class CallbackModule(DefaultCb):
         super().__init__()
         self._current_role = None
         self._last_role = None
+        self._current_handler_role = None
 
     def v2_runner_on_start(self, host, task):
         return
@@ -63,6 +64,7 @@ class CallbackModule(DefaultCb):
         self._display.display("", screen_only=True)
         self._display.display(title, color='magenta')
         self._display.display('─' * len(title), color='magenta')
+        self._printed_handler_roles = set()
 
     # —— Override includes to get an emoji —— #
     def v2_playbook_on_include(self, included_file):
@@ -151,6 +153,20 @@ class CallbackModule(DefaultCb):
             indent = " " * (len(host) + 3)
             self._display.display(f"{indent}{msg}", color="dark gray")
 
+    def v2_playbook_on_handler_task_start(self, task):
+        role_obj = getattr(task, '_role', None)
+        if not role_obj:
+            return
+        role_name = role_obj.get_name() or role_obj._role_name
+        if role_name in self._printed_handler_roles:
+            return
+        header = f"▶️ {role_name} handlers"
+        line   = '─' * (len(header) + 2)
+        self._display.display("",            screen_only=True)
+        self._display.display(header, color='yellow', screen_only=True)
+        self._display.display(line,   color='yellow', screen_only=True)
+        self._printed_handler_roles.add(role_name)
+
     # —— Loop‐item callbacks —— #
     def _print_item_details(self, result, host):
         """Helper to print msg, item.key/value, and diff.before→after."""
@@ -171,7 +187,16 @@ class CallbackModule(DefaultCb):
                 self._display.display(f"{indent}{key} = {val}", color="dark gray")
 
         # 3) diff entries
-        for d in res.get("diff", []):
+        diffs = res.get("diff")
+        if isinstance(diffs, list):
+            entries = diffs
+        elif isinstance(diffs, dict):
+            entries = [diffs]
+        else:
+            entries = []
+        for d in entries:
+            if not isinstance(d, dict):
+                    continue
             before = d.get("before")
             after  = d.get("after")
             if before and after:
@@ -230,3 +255,5 @@ class CallbackModule(DefaultCb):
 
                 self._display.display(f"  {e} {count} {label}", color=color, screen_only=True)
             self._display.display("", screen_only=True)
+
+        # self._display.display("Setup complete. https://github.com/lissy93/ansibles", color="blue" screen_only=True)
