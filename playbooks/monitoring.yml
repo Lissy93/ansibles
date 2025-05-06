@@ -3,35 +3,52 @@
   hosts: all
   become: true
   tags: monitoring
-  roles:
-    - role: monit
-      tags: [ monit, monitoring ]
-      ignore_errors: true
-      
-    - role: logrotate
-      tags: [ logrotate, monitoring ]
-      ignore_errors: true
-
-    - role: loki
-      tags: [ loki, monitoring ]
+  
+  tasks:
+    - include_role:
+        name: monit
+      when: monit_enabled | default(true)
+      tags: [ monit ]
       ignore_errors: true
 
-    - role: grafana-agent
-      tags: [ grafana-agent, monitoring ]
+    - include_role:
+        name: logrotate
+      when: logrotate_enabled | default(true)
+      tags: [ logrotate ]
       ignore_errors: true
 
-    - role: blackbox_exporter
-      tags: [ blackbox_exporter, monitoring ]
+    - include_role:
+        name: loki
+      when: loki_enabled | default(true)
+      tags: [ loki ]
       ignore_errors: true
 
-    - role: node_exporter
-      tags: [ node_exporter, monitoring ]
+    - include_role:
+        name: grafana-agent
+      when: grafana_agent_enabled | default(true)
+      tags: [ grafana-agent ]
       ignore_errors: true
 
-    - role: prometheus
-      tags: [ prometheus, monitoring ]
+    - include_role:
+        name: blackbox_exporter
+      when: blackbox_exporter_enabled | default(true)
+      tags: [ blackbox_exporter ]
       ignore_errors: true
 
-    - role: grafana
-      tags: [ grafana, monitoring ]
+    - include_role:
+        name: node_exporter
+      when: node_exporter_enabled | default(true)
+      tags: [ node_exporter ]
+      ignore_errors: true
+
+    - include_role:
+        name: prometheus
+      when: prometheus_enabled | default(true)
+      tags: [ prometheus ]
+      ignore_errors: true
+
+    - include_role:
+        name: grafana
+      when: grafana_enabled | default(true)
+      tags: [ grafana ]
       ignore_errors: true

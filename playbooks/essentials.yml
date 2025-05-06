@@ -20,14 +20,48 @@
   hosts: all
   become: true
   tags: essentials
-  roles:
-    - installs
-    - users
-    - directories
-    - timezone
-    - hostname
-    - firewall
-    # - mail
+
+  tasks:
+    - include_role:
+        name: installs
+      when: installs_enabled | default(true)
+      tags: [ installs ]
+      ignore_errors: true
+
+    - include_role:
+        name: users
+      when: users_enabled | default(true)
+      tags: [ users ]
+      ignore_errors: true
+
+    - include_role:
+        name: directories
+      when: directories_enabled | default(true)
+      tags: [ directories ]
+      ignore_errors: true
+
+    - include_role:
+        name: timezone
+      when: timezone_enabled | default(true)
+      tags: [ timezone ]
+      ignore_errors: true
+
+    - include_role:
+        name: hostname
+      when: hostname_enabled | default(true)
+      tags: [ hostname ]
+      ignore_errors: true
+
+    - include_role:
+        name: firewall
+      when: firewall_enabled | default(true)
+      tags: [ firewall ]
+      ignore_errors: true
+
+    # - include_role:
+    #     name: mail
+    #   when: mail_enabled | default(false)
+    #   tags: [ mail ]
 
 - name: 'Essentials: SSH config - pre-lockdown'
   hosts: all

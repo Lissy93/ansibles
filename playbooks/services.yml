@@ -4,6 +4,9 @@
   hosts: all
   become: true
   tags: services
-  roles:
-    - role: geerlingguy.docker
-      tags: [ docker, services ]
+  tasks:
+    - include_role:
+        name: docker
+      when: docker_enabled | default(true)
+      tags: [ docker ]
+      ignore_errors: true

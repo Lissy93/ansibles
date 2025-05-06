@@ -42,5 +42,5 @@
           - user_ssh_key_path is defined
         fail_msg: |
           You must define user_password, new_user and user_ssh_key_path variables
-          Put them in: inventories/remote/host_vars/{{ansible_hostname}}.yml
-          or (if shared) in: inventories/remote/group_vars/all.yml
+          Put them in: inventories/production/host_vars/{{ansible_hostname}}.yml
+          or (if shared) in: inventories/production/group_vars/all.yml

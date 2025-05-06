@@ -1,13 +1,23 @@
 # Configures easy access to the server via Cockpit (web UI) and Tailscale (VPN)
 
-- name: 'Access'
+- name: Access
   hosts: all
   become: true
   tags: access
-  roles:
-    - role: tailscale
-      tags: [ tailscale, access ]
-      when: tailscale_auth_key|default('')|length > 0
-    - role: cockpit
-      tags: [ cockpit, access ]
-    
+
+  tasks:
+    - block:
+        - include_role:
+            name: tailscale
+          when: tailscale_enabled | default(true)
+      rescue:
+        - debug:
+            msg: "⚠️ tailscale role failed. Continuing with next role."
+      always:
+        - name: clear any failure flag so next roles still run
+          meta: clear_host_errors
+
+    - include_role:
+        name: cockpit
+      when: cockpit_enabled | default(true)
+      tags: [cockpit]
