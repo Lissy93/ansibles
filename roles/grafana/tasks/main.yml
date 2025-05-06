@@ -74,7 +74,7 @@
 
 - name: Wait for Grafana HTTP to be available
   ansible.builtin.uri:
-    url:          "http://localhost:{{ grafana_http_port }}/api/health"
+    url:          "http://localhost:{{ grafana_port }}/api/health"
     status_code:  200
     return_content: no
     timeout:      10

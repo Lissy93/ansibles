@@ -1,35 +1,78 @@
-- name: Allow fallback SSH port 22 if in setup mode
+---
+- name: skip firewall if disabled
+  meta: end_host
+  when: not ufw_enabled
+
+- name: ensure ufw is installed
+  apt:
+    name: ufw
+    state: present
+    update_cache: true
+
+- name: reset ufw to defaults
+  ufw:
+    state: reset
+  when: ufw_reset
+
+- name: set default incoming policy
+  ufw:
+    direction: incoming
+    policy: "{{ ufw_default_incoming_policy }}"
+
+- name: set default outgoing policy
+  ufw:
+    direction: outgoing
+    policy: "{{ ufw_default_outgoing_policy }}"
+
+- name: allow TCP ports
   ufw:
     rule: allow
-    port: "22"
+    port: "{{ item }}"
     proto: tcp
-  when: ssh_port != "22"
+  loop: "{{ ufw_allowed_tcp_ports }}"
+  when: ufw_allowed_tcp_ports is defined
 
-- name: Allow custom SSH port
+- name: allow UDP ports
   ufw:
     rule: allow
-    port: "{{ ssh_port }}"
-    proto: tcp
+    port: "{{ item }}"
+    proto: udp
+  loop: "{{ ufw_allowed_udp_ports }}"
+  when: ufw_allowed_udp_ports is defined
 
-- name: Allow HTTP
+- name: deny TCP ports
   ufw:
-    rule: allow
-    port: 80
+    rule: deny
+    port: "{{ item }}"
     proto: tcp
+  loop: "{{ ufw_denied_tcp_ports }}"
+  when: ufw_denied_tcp_ports is defined
 
-- name: Allow HTTPS
+- name: deny UDP ports
   ufw:
-    rule: allow
-    port: 443
+    rule: deny
+    port: "{{ item }}"
+    proto: udp
+  loop: "{{ ufw_denied_udp_ports }}"
+  when: ufw_denied_udp_ports is defined
+
+- name: lockdown - deny default SSH port 22
+  ufw:
+    rule: deny
+    port: 22
     proto: tcp
+  when:
+    - ufw_lockdown
+    - ssh_port is defined
+    - ssh_port | int != 22
 
-# TODO: Add all ports and rules
-
-- name: Enable UFW
+- name: enable ufw
   ufw:
     state: enabled
-    policy: deny
+    logging: "{{ ufw_logging }}"
 
-- name: Lock down firewall and remove old SSH port
-  include_tasks: lockdown.yml
-  when: firewall_lockdown | default(false)
+- name: verify ufw is active
+  command: ufw status verbose
+  register: ufw_status
+  changed_when: false
+  failed_when: "'Status: active' not in ufw_status.stdout"

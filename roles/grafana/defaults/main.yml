@@ -9,7 +9,7 @@ grafana_package: "grafana"
 grafana_service: "grafana-server"
 
 # HTTP port for health check
-grafana_http_port: 3000
+grafana_port: 3000
 
 # admin credentials (empty = leave default)
 grafana_admin_user:      "admin"

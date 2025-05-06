@@ -4,7 +4,7 @@
     state: present
     update_cache: true
 
-- name: Install optional Cockpit components if available
+- name: "Install component: {{ item }}"
   apt:
     name: "{{ item }}"
     state: present
@@ -14,8 +14,12 @@
     - cockpit-storaged
     - cockpit-packagekit
     - cockpit-system
+    - cockpit-pcp
+    - cockpit-sensors
+    - cockpit-files
+    - cockpit-sosreport
+    - cockpit-podman
   ignore_errors: true
-
 
 - name: Ensure cockpit.socket is enabled and started
   systemd:

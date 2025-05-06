@@ -76,7 +76,7 @@
 
 - name: Wait for Prometheus ready endpoint
   ansible.builtin.uri:
-    url: "http://localhost:9090/-/ready"
+    url: "http://localhost:{{ prometheus_port }}/-/ready"
     status_code: 200
     return_content: no
     timeout: 5

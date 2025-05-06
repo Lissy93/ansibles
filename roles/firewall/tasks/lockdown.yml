@@ -1,6 +1,8 @@
-- name: Deny default SSH port 22 (after switching)
-  ufw:
+- name: "Deny ports no longer in use"
+  ansible.builtin.ufw:
     rule: deny
-    port: "22"
-    proto: tcp
-  when: ssh_port != "22"
+    port: "{{ item }}"
+  loop: "{{ firewall_deny_ports }}"
+  loop_control:
+    label: "{{ item }}"
+  when: firewall_deny_ports is defined and firewall_lockdown | bool

@@ -7,8 +7,11 @@ grafana_agent_binary_path: "/usr/local/bin/grafana-agent"
 grafana_agent_data_path: "/var/lib/grafana-agent"
 grafana_agent_config_file: "{{ grafana_agent_config_path }}/config.yml"
 
-loki_push_url: "http://localhost:3100/loki/api/v1/push"
-prometheus_remote_write_url: "http://localhost:9090/api/v1/write"
+prometheus_port: 9091
+loki_http_port: 3100
+
+loki_push_url: "http://localhost:{{ loki_http_port }}/loki/api/v1/push"
+prometheus_remote_write_url: "http://localhost:{{ prometheus_port }}/api/v1/write"
 
 log_paths:
   - /var/log/syslog

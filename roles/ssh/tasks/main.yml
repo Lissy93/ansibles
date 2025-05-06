@@ -23,6 +23,15 @@
     proto: tcp
   when: not ssh_lockdown | default(false)
 
+- name: Ensure SSH privilege separation directory exists
+  file:
+    path: /run/sshd
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
 - name: Harden SSH config
   lineinfile:
     path: /etc/ssh/sshd_config

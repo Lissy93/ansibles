@@ -1,13 +1,15 @@
 loki_enabled: true
 loki_url: "https://github.com/grafana/loki/releases/download/v3.5.0/loki-linux-amd64.zip"
 
+loki_http_port: 3100
+loki_grpc_port: 9095
 
 loki_config: |
   auth_enabled: false
 
   server:
-    http_listen_port: 3100
-    grpc_listen_port: 9095
+    http_listen_port: {{ loki_http_port }}
+    grpc_listen_port: {{ loki_grpc_port }}
 
   common:
     path_prefix: /opt/loki

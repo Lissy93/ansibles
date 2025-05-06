@@ -4,6 +4,7 @@
       {{ (borg_enabled | default(false)) and
         (borg_repo | default('') | length > 0) and
         (borg_password | default('') | length > 0) and
+        (user_email | default('') | length > 0) and
         (borgbase_apikey | default('') | length > 0) }}
 
 - name: Setup Borg backup

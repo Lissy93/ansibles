@@ -1,6 +1,3 @@
----
-# roles/apparmor/tasks/main.yml
-
 - block:
 
     # 1) Install & start the service

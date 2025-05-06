@@ -1,8 +1,3 @@
-- name: Skip server structure setup if disabled
-  ansible.builtin.debug:
-    msg: "Skipping, because server_structure_enabled = false"
-  when: not server_structure_enabled
-
 - name: Ensure base server directories exist
   ansible.builtin.file:
     path: "{{ item }}"
