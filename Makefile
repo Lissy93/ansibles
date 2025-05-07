@@ -96,7 +96,7 @@ lint: check-ansible
 # Existing targets
 
 first-apply first-run:
-	$(ANSIBLE_PLAYBOOK) $(PLAYBOOK) $(AS_ROOT) --tags initial
+	$(ANSIBLE_PLAYBOOK) $(PLAYBOOK) $(AS_ROOT)
 
 apply run:
 	$(ANSIBLE_PLAYBOOK) $(PLAYBOOK) $(BECOME)

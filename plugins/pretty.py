@@ -57,20 +57,25 @@ class CallbackModule(DefaultCb):
                 self._display.display(header, color='cyan', screen_only=True)
                 self._display.display(line,   color='cyan', screen_only=True)
                 self._current_role = role_name
-
+    
     def v2_playbook_on_play_start(self, play):
         self._play = play
         title = play.get_name().strip() or play._file_name or 'Mystery Playbook'
+        min_total = 40
+        inner = max(min_total - 2, len(title))
+        top    = "╭" + "─" * inner + "╮"
+        middle = "│" + title.center(inner) + "│"
+        bottom = "╰" + "─" * inner + "╯"
         self._display.display("", screen_only=True)
-        self._display.display(title, color='magenta')
-        self._display.display('─' * len(title), color='magenta')
+        for line in (top, middle, bottom):
+            self._display.display(line, color='magenta', screen_only=True)
         self._printed_handler_roles = set()
 
     # —— Override includes to get an emoji —— #
     def v2_playbook_on_include(self, included_file):
         hosts = ", ".join(h.name for h in included_file._hosts)
         emoji, color = self.STATUS_EMOJI["info"]
-        self._display.display(f"[{hosts}] {emoji} Included: {included_file._filename} ", color=None, newline=False)
+        self._display.display(f"[{hosts}] {emoji} Prepared for next role: {included_file._filename} ", color=None, newline=False)
         self._display.display(f"(Done)", color=color)
 
     # —— Per‐task callbacks —— #
@@ -100,6 +105,10 @@ class CallbackModule(DefaultCb):
 
         host = result._host.get_name()
         task = result.task_name or result.task.get_name()
+        if "Gathering Facts" in task:
+            self._display.display(f"[{host}] 🛂 {task} ", color=None, newline=False)
+            self._display.display(f"(Done)", color="cyan")
+            return
         e, c  = self.STATUS_EMOJI["ok"]
         self._display.display(f"[{host}] {e} {task} ", color=None, newline=False)
         self._display.display(f"(Success)", color=c)
@@ -162,9 +171,9 @@ class CallbackModule(DefaultCb):
             return
         header = f"▶️ {role_name} handlers"
         line   = '─' * (len(header) + 2)
-        self._display.display("",            screen_only=True)
+        self._display.display("", screen_only=True)
         self._display.display(header, color='yellow', screen_only=True)
-        self._display.display(line,   color='yellow', screen_only=True)
+        self._display.display(line, color='yellow', screen_only=True)
         self._printed_handler_roles.add(role_name)
 
     # —— Loop‐item callbacks —— #
@@ -256,4 +265,7 @@ class CallbackModule(DefaultCb):
                 self._display.display(f"  {e} {count} {label}", color=color, screen_only=True)
             self._display.display("", screen_only=True)
 
-        # self._display.display("Setup complete. https://github.com/lissy93/ansibles", color="blue" screen_only=True)
+        self._display.display(
+            "Setup complete. Thanks for using https://github.com/lissy93/ansibles",
+            color="blue", screen_only=True
+        )

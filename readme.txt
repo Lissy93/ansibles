@@ -128,7 +128,7 @@ ADDING SERVERS 🖥️
 Define your list of hosts (servers to manage) in the inventory file(s).
 The path which ansible looks for hosts in, is specified in ./ansible.cfg
 If it's your first time, you can run `make scaffold-hosts` to create a template
-Then complete the values in .inventories/remote/hosts.yml, which looks like this:
+Then complete the values in .inventories/production/hosts.yml, like this:
 
 all:
   hosts:
@@ -207,7 +207,7 @@ This is the structure of my project:
 ├── callback_plugins/     # Custom Ansible callback plugins
 │   └── pretty.py         # Emoji & color stdout formatting
 ├── inventories/          # Host/group definitions and vars
-│   └── remote/           # Remote production inventory
+│   └── production/       # Remote production inventory
 │       ├── hosts.yml     # Inventory host list
 │       ├── group_vars/   # Variables applied by group
 │       │   └── all.yml   # Variables to be shared by all servers in this group
